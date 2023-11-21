@@ -8,7 +8,7 @@ import org.springframework.transaction.annotation.EnableTransactionManagement;
 @EnableTransactionManagement
 public class AbstractMigrationConf {
    @Bean
-    public TestTransactionExecuter testTransactionExecuter() {
+   public TestTransactionExecuter testTransactionExecuter() {
        return new TestTransactionExecuter();
    }
 
