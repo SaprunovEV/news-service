@@ -13,6 +13,6 @@ public class CategoryEntity {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id", nullable = false)
     private Long id;
-    @Column(nullable = false)
+    @Column(nullable = false, length = 50)
     private String name;
 }

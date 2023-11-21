@@ -1,8 +1,9 @@
 package by.sapra.newsservice.models;
 
 import by.sapra.newsservice.config.AbstractMigrationTest;
+import net.bytebuddy.utility.RandomString;
 import org.hibernate.exception.ConstraintViolationException;
-import org.jetbrains.annotations.NotNull;
+import org.hibernate.exception.DataException;
 import org.junit.jupiter.api.Test;
 
 import static by.sapra.newsservice.testUtils.CategoryTestDataBuilder.aCategory;
@@ -22,6 +23,17 @@ class CategoryEntityTest extends AbstractMigrationTest {
     @Test
     void shouldThrowExceptionIfNameIsNull() throws Exception {
         assertThrows(ConstraintViolationException.class, this::executeNullName);
+    }
+
+    @Test
+    void shouldThrowExceptionIfNameIsEmpty() throws Exception {
+        assertThrows(DataException.class, this::executeMoreThenPossibly);
+    }
+
+    private void executeMoreThenPossibly() {
+        getTestTransactionExecuter()
+                .execute(() -> getTestDbFacade().save(aCategory().withName(
+                        RandomString.make(51))));
     }
 
     private void executeNullName() {
