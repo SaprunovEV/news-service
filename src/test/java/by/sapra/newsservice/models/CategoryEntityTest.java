@@ -26,7 +26,7 @@ class CategoryEntityTest extends AbstractMigrationTest {
     }
 
     @Test
-    void shouldThrowExceptionIfNameIsEmpty() throws Exception {
+    void shouldThrowExceptionIfNameIsMoreThenPossibly() throws Exception {
         assertThrows(DataException.class, this::executeMoreThenPossibly);
     }
 
