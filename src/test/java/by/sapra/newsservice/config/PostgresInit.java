@@ -17,7 +17,7 @@ public class PostgresInit {
                     "spring.datasource.url=" + container.getJdbcUrl(),
                     "spring.datasource.username=" + container.getUsername(),
                     "spring.datasource.password=" + container.getPassword(),
-                    "spring.main.jpa.generate-ddl=true",
+                    "spring.jpa.generate-ddl=true",
                     "spring.datasource.driver-class-name" + container.getDriverClassName()
             ).applyTo(applicationContext);
         }
