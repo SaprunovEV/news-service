@@ -15,7 +15,7 @@ public class CategoryEntity {
     @Column(name = "id", nullable = false)
     private Long id;
     @Column(nullable = false, length = 50, unique = true)
-    @NotBlank
+    @NotBlank(message = "Column name in category should not be empty!")
     private String name;
 
     public void setName(String name) {
