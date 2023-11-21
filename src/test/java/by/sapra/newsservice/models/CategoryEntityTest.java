@@ -30,6 +30,20 @@ class CategoryEntityTest extends AbstractMigrationTest {
         assertThrows(DataException.class, this::executeMoreThenPossibly);
     }
 
+    @Test
+    void shouldThrowExceptionIfDatabaseHaveCategoryWithName() throws Exception {
+        assertThrows(ConstraintViolationException.class, this::executeEqualsName);
+    }
+
+    private void executeEqualsName() {
+        getTestTransactionExecuter()
+                .execute(() -> {
+                    String name = "testName";
+                    getTestDbFacade().save(aCategory().withName(name));
+                    getTestDbFacade().save(aCategory().withName(name));
+                });
+    }
+
     private void executeMoreThenPossibly() {
         getTestTransactionExecuter()
                 .execute(() -> getTestDbFacade().save(aCategory().withName(
