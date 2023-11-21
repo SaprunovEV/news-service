@@ -9,6 +9,6 @@ public class AbstractMigrationTest extends AbstractDataTest{
     private TestTransactionExecuter testTransactionExecuter;
 
     public TestTransactionExecuter getTestTransactionExecuter() {
-        return new TestTransactionExecuter();
+        return testTransactionExecuter;
     }
 }
