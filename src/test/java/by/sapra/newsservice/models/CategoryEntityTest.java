@@ -22,7 +22,7 @@ class CategoryEntityTest extends AbstractMigrationTest {
 
     @Test
     void shouldThrowExceptionIfNameIsNull() throws Exception {
-        assertThrows(ConstraintViolationException.class, this::executeNullName);
+        assertThrows(jakarta.validation.ConstraintViolationException.class, this::executeNullName);
     }
 
     @Test
@@ -33,6 +33,32 @@ class CategoryEntityTest extends AbstractMigrationTest {
     @Test
     void shouldThrowExceptionIfDatabaseHaveCategoryWithName() throws Exception {
         assertThrows(ConstraintViolationException.class, this::executeEqualsName);
+    }
+
+    @Test
+    void shouldThrowExceptionIfDatabaseHaveCategoryWithNameIgnoreCase() throws Exception {
+        assertThrows(ConstraintViolationException.class, this::executeEqualsNameIgnoreCase);
+    }
+
+    @Test
+    void shouldThrowExceptionIfNameIsEmpty() throws Exception {
+        assertThrows(jakarta.validation.ConstraintViolationException.class, this::executeEmptyName);
+    }
+
+    private void executeEmptyName() {
+        getTestTransactionExecuter().execute(() -> {
+            getTestDbFacade().save(aCategory().withName(""));
+        });
+    }
+
+    private void executeEqualsNameIgnoreCase() {
+        getTestTransactionExecuter()
+                .execute(() -> {
+                    String lowerCase = "test";
+                    String upperCase = "TEST";
+                    getTestDbFacade().save(aCategory().withName(lowerCase));
+                    getTestDbFacade().save(aCategory().withName(upperCase));
+                });
     }
 
     private void executeEqualsName() {
