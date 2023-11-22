@@ -1,0 +1,7 @@
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/news
+    username: ${POSTGRES_USER:postgres}
+    password: ${POSTGRES+PASSWORD:postgres}
+    hikari:
+      schema: news_schema
