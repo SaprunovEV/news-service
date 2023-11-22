@@ -47,5 +47,5 @@ public class CommentEntity {
 
     @OneToMany(mappedBy = "parent", cascade = ALL)
     @ToString.Exclude
-    private List<CommentEntity> comments;
+    private List<CommentEntity> children;
 }
