@@ -10,39 +10,42 @@ import org.hibernate.annotations.UpdateTimestamp;
 import java.time.Instant;
 import java.util.List;
 
+import static jakarta.persistence.CascadeType.ALL;
 import static jakarta.persistence.GenerationType.IDENTITY;
 
 @Entity
-@Table(name = "news")
+@Table(name = "comment")
 @Getter
 @Setter
-public class NewsEntity {
+public class CommentEntity {
+
     @Id
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
-
-    @Column(nullable = false, length = 50)
-    private String title;
-    @Column(name = "abstract", length = 100)
-    private String newsAbstract;
-    @Column(name = "body", nullable = false)
-    private String body;
 
     @CreationTimestamp
     private Instant createAt;
     @UpdateTimestamp
     private Instant updateAt;
+    @Column(nullable = false)
+    private String body;
+
+    @ManyToOne
+    @JoinColumn(name = "parent_id")
+    @ToString.Exclude
+    private CommentEntity parent;
 
     @ManyToOne
     @JoinColumn(name = "user_id")
     @ToString.Exclude
     private UserEntity user;
 
-    @OneToMany(mappedBy = "news", cascade = CascadeType.ALL)
+    @ManyToOne
+    @JoinColumn(name = "news_id")
     @ToString.Exclude
-    private List<Category2News> category2News;
+    private NewsEntity news;
 
-    @OneToMany(mappedBy = "news", cascade = CascadeType.ALL)
+    @OneToMany(mappedBy = "parent", cascade = ALL)
     @ToString.Exclude
-    private List<CommentEntity> comments;
+    private List<CommentEntity> children;
 }
