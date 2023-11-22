@@ -27,7 +27,7 @@ public class CommentEntity {
     private Instant createAt;
     @UpdateTimestamp
     private Instant updateAt;
-
+    @Column(nullable = false)
     private String body;
 
     @ManyToOne
