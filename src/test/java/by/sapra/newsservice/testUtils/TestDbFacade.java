@@ -22,6 +22,13 @@ public class TestDbFacade {
         return transactionTemplate.execute(status -> entityManager.persistAndFlush(builder.build()));
     }
 
+    public void delete(Object entity) {
+        transactionTemplate.execute(status -> {
+            entityManager.remove(entity);
+            return null;
+        });
+    }
+
     public <T> TestDataBuilder<T> persistedOnce(TestDataBuilder<T> builder) {
         return new TestDataBuilder<>() {
             private T entity;

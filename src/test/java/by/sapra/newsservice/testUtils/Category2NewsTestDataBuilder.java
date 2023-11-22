@@ -32,8 +32,13 @@ public class Category2NewsTestDataBuilder implements TestDataBuilder<Category2Ne
     public Category2News build() {
         Category2News entity = new Category2News();
 
-        entity.setNews(news.build());
-        entity.setCategory(category.build());
+        NewsEntity newsEntity = news.build();
+        newsEntity.getCategory2News().add(entity);
+        entity.setNews(newsEntity);
+
+        CategoryEntity categoryEntity = category.build();
+        categoryEntity.getCategory2News().add(entity);
+        entity.setCategory(categoryEntity);
 
         return entity;
     }

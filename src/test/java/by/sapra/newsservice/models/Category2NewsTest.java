@@ -29,4 +29,34 @@ class Category2NewsTest extends AbstractMigrationTest {
             assertEquals(news.build().getTitle(), actual.getNews().getTitle());
         });
     }
+
+    @Test
+    void shouldBeRemovedIfCategoryWillRemove() throws Exception {
+        TestDataBuilder<CategoryEntity> category = getTestDbFacade().persistedOnce(aCategory());
+        TestDataBuilder<NewsEntity> news = getTestDbFacade().persistedOnce(aNews().withUser(getTestDbFacade().persistedOnce(aUser())));
+        Category2News savedLink = getTestDbFacade().save(
+                aCategory2News()
+                        .withCategory(category)
+                        .withNews(news)
+        );
+
+        getTestDbFacade().delete(category.build());
+
+        assertNull(getTestDbFacade().find(savedLink.getId(), Category2News.class));
+    }
+
+    @Test
+    void shouldBeRemovedIfNewsWillRemove() throws Exception {
+        TestDataBuilder<CategoryEntity> category = getTestDbFacade().persistedOnce(aCategory());
+        TestDataBuilder<NewsEntity> news = getTestDbFacade().persistedOnce(aNews().withUser(getTestDbFacade().persistedOnce(aUser())));
+        Category2News savedLink = getTestDbFacade().save(
+                aCategory2News()
+                        .withCategory(category)
+                        .withNews(news)
+        );
+
+        getTestDbFacade().delete(news.build());
+
+        assertNull(getTestDbFacade().find(savedLink.getId(), Category2News.class));
+    }
 }
