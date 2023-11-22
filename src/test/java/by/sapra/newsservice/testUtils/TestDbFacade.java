@@ -47,7 +47,10 @@ public class TestDbFacade {
         transactionTemplate.execute(status -> {
             JdbcTestUtils.deleteFromTables(
                     template,
-                    "category"
+                    "category_news_link",
+                    "news",
+                    "category",
+                    "users"
             );
 
             return null;
