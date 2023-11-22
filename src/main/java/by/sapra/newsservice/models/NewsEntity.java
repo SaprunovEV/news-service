@@ -20,9 +20,11 @@ public class NewsEntity {
     @GeneratedValue(strategy = IDENTITY)
     private Long id;
 
+    @Column(nullable = false, length = 50)
     private String title;
-    @Column(name = "abstract")
+    @Column(name = "abstract", length = 100)
     private String newsAbstract;
+    @Column(name = "body", nullable = false)
     private String body;
 
     @CreationTimestamp
