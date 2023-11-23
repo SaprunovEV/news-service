@@ -107,7 +107,8 @@ class NewsControllerTest {
         ArrayList<News> news = new ArrayList<>();
 
         for (long i = 0; i < count; i++) {
-            News news1 = createOneNews(i);
+            News news1 = createOneNews(i + 1);
+            news.add(news1);
         }
 
         return news;
@@ -131,7 +132,7 @@ class NewsControllerTest {
         List<NewsItem> news = new ArrayList<>();
 
         for (int i = 0; i < count; i++) {
-            news.add(createNewsItem(i));
+            news.add(createNewsItem(i + 1));
         }
 
         return NewsListResponse.builder()
@@ -145,7 +146,7 @@ class NewsControllerTest {
                 .title("Test title " + id)
                 .newsAbstract("test abstract " + id)
                 .body("test body " + id)
-                .commentCount(id)
+                .commentsCount(id)
                 .build();
     }
 
