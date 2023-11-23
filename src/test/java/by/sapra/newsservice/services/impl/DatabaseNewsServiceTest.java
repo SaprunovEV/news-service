@@ -1,10 +1,13 @@
 package by.sapra.newsservice.services.impl;
 
+import by.sapra.newsservice.models.NewsEntity;
+import by.sapra.newsservice.models.UserEntity;
 import by.sapra.newsservice.services.mappers.NewsModelMapper;
 import by.sapra.newsservice.services.models.Comment;
 import by.sapra.newsservice.services.models.News;
 import by.sapra.newsservice.services.models.filters.NewsFilter;
 import by.sapra.newsservice.storages.NewsStorage;
+import by.sapra.newsservice.storages.models.CommentListModel;
 import by.sapra.newsservice.storages.models.CommentModel;
 import by.sapra.newsservice.storages.models.NewsListModel;
 import by.sapra.newsservice.storages.models.NewsModel;
@@ -16,6 +19,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Function;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;
@@ -129,14 +133,19 @@ class DatabaseNewsServiceTest {
                             .id(i)
                             .newsAbstract("abstract " + i)
                             .body("body " + i)
-                            .comments(createCommentsModel(i))
                             .title("title " + i)
+                            .commentSize(i)
+                            .comments(createCommentListModel(i))
                         .build());
         }
         return NewsListModel.builder()
                 .news(news)
                 .count(count)
                 .build();
+    }
+
+    private CommentListModel createCommentListModel(long count) {
+        return new CommentListModel(new NewsEntity(), user -> null, count);
     }
 
     private List<CommentModel> createCommentsModel(int count) {
