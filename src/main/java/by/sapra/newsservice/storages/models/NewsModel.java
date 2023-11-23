@@ -3,8 +3,6 @@ package by.sapra.newsservice.storages.models;
 import lombok.Builder;
 import lombok.Data;
 
-import java.util.List;
-
 @Data
 @Builder
 public class NewsModel {
@@ -12,5 +10,6 @@ public class NewsModel {
     private String title;
     private String newsAbstract;
     private String body;
-    private List<CommentModel> comments;
+    private long commentSize;
+    private CommentListModel comments;
 }
