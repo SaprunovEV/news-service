@@ -43,6 +43,16 @@ class DatabaseNewsServiceTest {
     }
 
     @Test
+    void shouldReturnEmptyList() throws Exception {
+        NewsListModel listModel = NewsListModel.builder().count(0).build();
+        when(newsStorage.findAll(any())).thenReturn(listModel);
+
+        List<News> actual = service.findAll(new NewsFilter());
+
+        assertEquals(0, actual.size());
+    }
+
+    @Test
     void shouldCallNewsStorage() throws Exception {
         NewsFilter filter = new NewsFilter();
 
