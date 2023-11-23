@@ -3,6 +3,7 @@ package by.sapra.newsservice.storages;
 import by.sapra.newsservice.config.AbstractDataTest;
 import by.sapra.newsservice.services.models.filters.NewsFilter;
 import by.sapra.newsservice.storages.models.NewsListModel;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -17,9 +18,9 @@ class NewsStorageTest extends AbstractDataTest {
     @Test
     void shouldReturnEmptyModelIfDatabaseIsEmpty() throws Exception {
 
-        NewsFilter filter = new NewsFilter();
-        filter.setPageSize(3);
-        filter.setPageNumber(0);
+        int pageNumber = 0;
+        int pageSize = 3;
+        NewsFilter filter = getNewsFilter(pageNumber, pageSize);
 
         NewsListModel actual = newsStorage.findAll(filter);
 
@@ -31,5 +32,16 @@ class NewsStorageTest extends AbstractDataTest {
         });
     }
 
+    @NotNull
+    private static NewsFilter getNewsFilter(int pageNumber, int pageSize) {
+        NewsFilter filter = new NewsFilter();
+        filter.setPageSize(pageSize);
+        filter.setPageNumber(pageNumber);
+        return filter;
+    }
 
+    @Test
+    void shouldDoSomething() throws Exception {
+
+    }
 }
