@@ -5,10 +5,12 @@ import by.sapra.newsservice.storages.NewsStorage;
 import by.sapra.newsservice.storages.models.NewsListModel;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
+
 @Component
 public class DatabaseNesStorage implements NewsStorage {
     @Override
     public NewsListModel findAll(NewsFilter filter) {
-        return null;
+        return NewsListModel.builder().news(new ArrayList<>()).build();
     }
 }
