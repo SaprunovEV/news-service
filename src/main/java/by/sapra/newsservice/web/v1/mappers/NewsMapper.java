@@ -14,9 +14,9 @@ import static org.mapstruct.ReportingPolicy.IGNORE;
 public interface NewsMapper {
     default NewsListResponse newsListToNewsListResponse(List<News> newsList) {
         return NewsListResponse.builder()
-                .news(newsList.stream().map(this::newsListToNesItemList).toList())
+                .news(newsList.stream().map(this::newsToNesItemList).toList())
                 .build();
     }
 
-    NewsItem newsListToNesItemList(News news);
+    NewsItem newsToNesItemList(News news);
 }
