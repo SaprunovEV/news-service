@@ -12,5 +12,6 @@ public class News {
     private String title;
     private String newsAbstract;
     private String body;
+    private Long commentsCount;
     private List<Comment> comments;
 }
