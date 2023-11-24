@@ -5,6 +5,7 @@ import by.sapra.newsservice.services.models.Comment;
 import by.sapra.newsservice.services.models.News;
 import by.sapra.newsservice.services.models.filters.NewsFilter;
 import by.sapra.newsservice.testUtils.StringTestUtils;
+import by.sapra.newsservice.web.v1.AbstractErrorControllerTest;
 import by.sapra.newsservice.web.v1.mappers.NewsMapper;
 import by.sapra.newsservice.web.v1.models.NewsItem;
 import by.sapra.newsservice.web.v1.models.NewsListResponse;
@@ -14,7 +15,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
@@ -26,7 +26,7 @@ import static org.springframework.test.web.servlet.request.MockMvcRequestBuilder
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = {NewsController.class})
-class NewsControllerTest {
+class NewsControllerTest extends AbstractErrorControllerTest {
     @Autowired
     private MockMvc mockMvc;
     @MockBean
@@ -103,74 +103,6 @@ class NewsControllerTest {
         verify(newsMapper, times(1)).newsListToNewsListResponse(newsList);
     }
 
-    @Test
-    void whenPageSizeNotSpecified_thenReturnError() throws Exception {
-        String pageNumber = "0";
-        MockHttpServletResponse response = mockMvc.perform(
-                get("/api/v1/news")
-                        .param("pageNumber", pageNumber)
-                )
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse();
-
-        response.setCharacterEncoding("UTF-8");
-
-        String actual = response.getContentAsString();
-
-        String expected = StringTestUtils.readStringFromResources("/responses/v1/errors/pagination_size_not_specified_error_response.json");
-
-        JsonAssert.assertJsonEquals(expected, actual);
-    }
-
-    @Test
-    void whenPageSizeIsNegative_thenReturnError() throws Exception {
-        MockHttpServletResponse response = mockMvc.perform(getWithPagination("0", "-1"))
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse();
-
-        response.setCharacterEncoding("UTF-8");
-
-        String actual = response.getContentAsString();
-
-        String expected = StringTestUtils.readStringFromResources("/responses/v1/errors/pagination_size_negative_response.json");
-
-        JsonAssert.assertJsonEquals(expected, actual);
-    }
-
-    @Test
-    void whenPageNumberNotSpecified_thenReturnError() throws Exception {
-        String pageSize = "3";
-        MockHttpServletResponse response = mockMvc.perform(
-                        get("/api/v1/news")
-                                .param("pageSize", pageSize)
-                )
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse();
-
-        response.setCharacterEncoding("UTF-8");
-
-        String actual = response.getContentAsString();
-
-        String expected = StringTestUtils.readStringFromResources("/responses/v1/errors/pagination_number_not_specified_error_response.json");
-
-        JsonAssert.assertJsonEquals(expected, actual);
-    }
-
-    @Test
-    void whenPageNumberIsNegative_thenReturnError() throws Exception {
-        MockHttpServletResponse response = mockMvc.perform(getWithPagination("-1", "4"))
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse();
-
-        response.setCharacterEncoding("UTF-8");
-
-        String actual = response.getContentAsString();
-
-        String expected = StringTestUtils.readStringFromResources("/responses/v1/errors/pagination_number_negative_response.json");
-
-        JsonAssert.assertJsonEquals(expected, actual);
-    }
-
     @NotNull
     private static List<News> createNewsList(int count) {
         ArrayList<News> news = new ArrayList<>();
@@ -221,6 +153,11 @@ class NewsControllerTest {
 
     @NotNull
     private MockHttpServletRequestBuilder getWithPagination(String pageNumber, String pageSize) {
-        return get("/api/v1/news").param("pageSize", pageSize).param("pageNumber", pageNumber);
+        return get(getUrl()).param("pageSize", pageSize).param("pageNumber", pageNumber);
+    }
+
+    @Override
+    public String getUrl() {
+        return "/api/v1/news";
     }
 }
