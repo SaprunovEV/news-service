@@ -13,7 +13,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 
-import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -23,8 +22,9 @@ import static by.sapra.newsservice.testUtils.NewsTestDataBuilder.aNews;
 import static by.sapra.newsservice.testUtils.UserTestDataBuilder.aUser;
 import static java.util.function.Function.identity;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.*;
-import static org.mockito.Mockito.when;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.*;
 
 @ContextConfiguration(classes = NewsStorageConf.class)
 class NewsStorageTest extends AbstractDataTest {
@@ -86,20 +86,20 @@ class NewsStorageTest extends AbstractDataTest {
         NewsFilter filter = getNewsFilter(pageNumber, pageSize);
 
         int count = 5;
-        Map<Long, NewsEntity> expected = saveNewsEntities(count);
+        Map<Long, NewsEntity> map = saveNewsEntities(count);
+
+        List<NewsEntity> list = map.values().stream().toList().subList(0, 3);
+
+
+        when(mapper.entitiesListToNewsListModel(eq(list), any()))
+                .thenReturn(NewsListModel.builder()
+                        .count(list.size())
+                        .news(list.stream().map(news -> NewsModel.builder().build()).toList())
+                        .build());
 
         NewsListModel actual = newsStorage.findAll(filter);
 
-        assertListNews(expected, actual, pageSize);
-    }
-
-    private void assertListNews(Map<Long, NewsEntity> expected, NewsListModel actual, int count) {
-        assertAll(() -> {
-            assertEquals(count, actual.getCount(), "not correct size of page.");
-            for (NewsModel model: actual.getNews()) {
-                assertTrue(expected.containsKey(model.getId()), MessageFormat.format("entity with id {0} not found.", model.getId()));
-            }
-        });
+        verify(mapper, times(1)).entitiesListToNewsListModel(eq(list), any());
     }
 
     private Map<Long, NewsEntity> saveNewsEntities(int count) {
