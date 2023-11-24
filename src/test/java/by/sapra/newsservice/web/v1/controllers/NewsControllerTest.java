@@ -14,6 +14,7 @@ import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
@@ -100,6 +101,74 @@ class NewsControllerTest {
 
         verify(newsService, times(1)).findAll(newsFilter);
         verify(newsMapper, times(1)).newsListToNewsListResponse(newsList);
+    }
+
+    @Test
+    void whenPageSizeNotSpecified_thenReturnError() throws Exception {
+        String pageNumber = "0";
+        MockHttpServletResponse response = mockMvc.perform(
+                get("/api/v1/news")
+                        .param("pageNumber", pageNumber)
+                )
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse();
+
+        response.setCharacterEncoding("UTF-8");
+
+        String actual = response.getContentAsString();
+
+        String expected = StringTestUtils.readStringFromResources("/responses/v1/errors/pagination_size_not_specified_error_response.json");
+
+        JsonAssert.assertJsonEquals(expected, actual);
+    }
+
+    @Test
+    void whenPageSizeIsNegative_thenReturnError() throws Exception {
+        MockHttpServletResponse response = mockMvc.perform(getWithPagination("0", "-1"))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse();
+
+        response.setCharacterEncoding("UTF-8");
+
+        String actual = response.getContentAsString();
+
+        String expected = StringTestUtils.readStringFromResources("/responses/v1/errors/pagination_size_negative_response.json");
+
+        JsonAssert.assertJsonEquals(expected, actual);
+    }
+
+    @Test
+    void whenPageNumberNotSpecified_thenReturnError() throws Exception {
+        String pageSize = "3";
+        MockHttpServletResponse response = mockMvc.perform(
+                        get("/api/v1/news")
+                                .param("pageSize", pageSize)
+                )
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse();
+
+        response.setCharacterEncoding("UTF-8");
+
+        String actual = response.getContentAsString();
+
+        String expected = StringTestUtils.readStringFromResources("/responses/v1/errors/pagination_number_not_specified_error_response.json");
+
+        JsonAssert.assertJsonEquals(expected, actual);
+    }
+
+    @Test
+    void whenPageNumberIsNegative_thenReturnError() throws Exception {
+        MockHttpServletResponse response = mockMvc.perform(getWithPagination("-1", "4"))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse();
+
+        response.setCharacterEncoding("UTF-8");
+
+        String actual = response.getContentAsString();
+
+        String expected = StringTestUtils.readStringFromResources("/responses/v1/errors/pagination_number_negative_response.json");
+
+        JsonAssert.assertJsonEquals(expected, actual);
     }
 
     @NotNull
