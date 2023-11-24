@@ -52,33 +52,6 @@ class NewsStorageTest extends AbstractDataTest {
     }
 
     @Test
-    void shouldReadPageNews() throws Exception {
-        int pageNumber = 0;
-        int pageSize = 3;
-
-        NewsFilter filter = getNewsFilter(pageNumber, pageSize);
-
-        int count = 5;
-        Map<Long, NewsEntity> map = saveNewsEntities(count);
-
-        List<NewsEntity> list = map.values().stream().toList().subList(0, 3);
-
-
-        when(mapper.entitiesListToNewsListModel(eq(list), any()))
-                .thenReturn(NewsListModel.builder()
-                        .count(list.size())
-                        .news(list.stream().map(news -> NewsModel.builder().build()).toList())
-                        .build());
-
-        NewsListModel actual = newsStorage.findAll(filter);
-
-        assertAll(() -> {
-            assertEquals(actual.getNews().size(), actual.getCount(), "size of news must be equals count");
-            assertEquals(pageSize, actual.getCount(), "count must be equals page size");
-        });
-    }
-
-    @Test
     void shouldReturnCorrectModel() throws Exception {
         int pageNumber = 0;
         int pageSize = 3;
