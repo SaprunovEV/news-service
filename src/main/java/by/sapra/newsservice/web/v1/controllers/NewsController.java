@@ -9,6 +9,7 @@ import io.swagger.v3.oas.annotations.media.Content;
 import io.swagger.v3.oas.annotations.media.Schema;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,7 +33,7 @@ public class NewsController {
             responseCode = "200",
             content = @Content(schema = @Schema(implementation = NewsListResponse.class))
     )
-    public ResponseEntity<NewsListResponse> findAll(NewsFilter filter) {
+    public ResponseEntity<NewsListResponse> findAll(@Valid NewsFilter filter) {
         return ResponseEntity.ok(
                 mapper.newsListToNewsListResponse(service.findAll(filter))
         );
