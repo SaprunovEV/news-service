@@ -5,3 +5,9 @@ spring:
     password: ${POSTGRES_PASSWORD:postgres}
     hikari:
       schema: news_schema
+  jpa:
+    generate-ddl: true
+
+server:
+  port: 8080
+  host: http://localhost
