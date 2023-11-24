@@ -7,8 +7,10 @@ import by.sapra.newsservice.storages.CategoryStorage;
 import by.sapra.newsservice.storages.models.CategoryListModel;
 import by.sapra.newsservice.storages.models.CategoryModel;
 import org.jetbrains.annotations.NotNull;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -30,6 +32,11 @@ class CategoryServiceTest  {
     @Autowired
     private CategoryModelMapper mapper;
 
+    @AfterEach
+    void tearDown() {
+        Mockito.reset(storage, mapper);
+    }
+
     @Test
     void shouldNotReturnNull() throws Exception {
         CategoryFilter filter = createFilter(3, 0);
@@ -37,6 +44,25 @@ class CategoryServiceTest  {
         List<Category> actual = service.findAll(filter);
 
         assertNotNull(actual);
+    }
+
+    @Test
+    void shouldReturnEmptyCategoryListIfStorageWillReturnEmptyModel() throws Exception {
+        CategoryFilter filter = createFilter(3, 0);
+
+        CategoryListModel categoryListModel = createCategoryListModel(0);
+
+        when(storage.findAll(filter)).thenReturn(categoryListModel);
+
+        List<Category> expected = createCategoryList(0);
+        when(mapper.categoryListModelToCategoryList(categoryListModel)).thenReturn(expected);
+
+        List<Category> actual = service.findAll(filter);
+
+        assertIterableEquals(expected, actual);
+
+        verify(storage, times(1)).findAll(filter);
+        verify(mapper, times(1)).categoryListModelToCategoryList(categoryListModel);
     }
 
     @Test
@@ -75,12 +101,12 @@ class CategoryServiceTest  {
     }
 
     private CategoryListModel createCategoryListModel(long count) {
-        ArrayList<CategoryModel> list = new ArrayList<CategoryModel>();
+        ArrayList<CategoryModel> list = new ArrayList<>();
         for (long i = 0; i < count; i++) {
             createCategoryModel(i, "test category " + i);
         }
         return CategoryListModel.builder()
-                .count(3)
+                .count(count)
                 .categories(list)
                 .build();
     }
