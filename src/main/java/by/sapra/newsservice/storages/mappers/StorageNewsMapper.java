@@ -16,7 +16,7 @@ public interface StorageNewsMapper {
     default NewsListModel entitiesListToNewsListModel(List<NewsEntity> content, Map<Long, Long> countsMap) {
         return NewsListModel.builder()
                 .news(content.stream().map(entity -> entityToModel(entity, countsMap.get(entity.getId()))).toList())
-                .count(countsMap.values().stream().reduce(0L, Long::sum))
+                .count(content.size())
                 .build();
     }
 
