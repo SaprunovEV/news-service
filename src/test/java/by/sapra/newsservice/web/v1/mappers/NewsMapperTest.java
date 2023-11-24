@@ -14,7 +14,7 @@ import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = NewsMapperConf.class)
+@ContextConfiguration(classes = MapperConf.class)
 class NewsMapperTest {
     @Autowired
     NewsMapper newsMapper;
