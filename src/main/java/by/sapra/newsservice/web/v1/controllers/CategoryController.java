@@ -16,6 +16,7 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -56,5 +57,10 @@ public class CategoryController {
     )
     public ResponseEntity<?> handleFindAll(@Valid CategoryFilter filter) {
         return ResponseEntity.ok(mapper.categoryItemListToCategoryListResponse(service.findAll(filter)));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> handleFindById(@PathVariable(name = "id") Long id) {
+        return ResponseEntity.ok(mapper.categoryToCategoryResponse(service.findById(id)));
     }
 }

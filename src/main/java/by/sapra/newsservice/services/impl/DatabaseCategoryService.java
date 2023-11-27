@@ -5,6 +5,7 @@ import by.sapra.newsservice.services.mappers.CategoryModelMapper;
 import by.sapra.newsservice.services.models.Category;
 import by.sapra.newsservice.services.models.CategoryFilter;
 import by.sapra.newsservice.storages.CategoryStorage;
+import by.sapra.newsservice.web.v1.controllers.CategoryWithNews;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -18,5 +19,10 @@ public class DatabaseCategoryService implements CategoryService {
     @Override
     public List<Category> findAll(CategoryFilter filter) {
         return mapper.categoryListModelToCategoryList(storage.findAll(filter));
+    }
+
+    @Override
+    public CategoryWithNews findById(long id) {
+        return null;
     }
 }
