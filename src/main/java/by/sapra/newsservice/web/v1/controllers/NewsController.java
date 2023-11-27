@@ -22,7 +22,7 @@ import org.springframework.web.bind.annotation.RestController;
 @RestController
 @RequestMapping("/api/v1/news")
 @RequiredArgsConstructor
-@Tag(name = "news_v1", description = "News API version V1")
+@Tag(name = "news V1", description = "News API version V1")
 public class NewsController {
     private final NewsService service;
     private final NewsMapper mapper;
@@ -41,7 +41,7 @@ public class NewsController {
                             schema = @Schema(implementation = Long.class),
                             examples = {@ExampleObject(value = "3")})
             },
-            tags = {"news"}
+            tags = {"news", "V1"}
     )
     @ApiResponse(
             responseCode = "200",
