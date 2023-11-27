@@ -1,9 +1,9 @@
 package by.sapra.newsservice.web.v1.controllers;
 
-import by.sapra.newsservice.services.NewsService;
-import by.sapra.newsservice.services.models.filters.NewsFilter;
-import by.sapra.newsservice.web.v1.mappers.NewsMapper;
-import by.sapra.newsservice.web.v1.models.NewsListResponse;
+import by.sapra.newsservice.services.CategoryService;
+import by.sapra.newsservice.services.models.CategoryFilter;
+import by.sapra.newsservice.web.v1.mappers.CategoryMapper;
+import by.sapra.newsservice.web.v1.models.CategoryListResponse;
 import by.sapra.newsservice.web.v1.models.PaginationErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -20,16 +20,16 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 @RestController
-@RequestMapping("/api/v1/news")
+@RequestMapping("/api/v1/categories")
 @RequiredArgsConstructor
-@Tag(name = "news V1", description = "News API version V1")
-public class NewsController {
-    private final NewsService service;
-    private final NewsMapper mapper;
+@Tag(name = "Category V1", description = "Category API version V1")
+public class CategoryController {
+    private final CategoryService service;
+    private final CategoryMapper mapper;
     @GetMapping
     @Operation(
-            summary = "Get all news.",
-            description = "Get all news. Return list of news without comments.",
+            summary = "Get all categories.",
+            description = "Get all categories. Return list of categories without news.",
             method = "GET",
             parameters = {
                     @Parameter(
@@ -41,11 +41,11 @@ public class NewsController {
                             schema = @Schema(implementation = Long.class),
                             examples = {@ExampleObject(value = "3")})
             },
-            tags = {"news", "V1"}
+            tags = {"category", "V1"}
     )
     @ApiResponse(
             responseCode = "200",
-            content = @Content(schema = @Schema(implementation = NewsListResponse.class))
+            content = @Content(schema = @Schema(implementation = CategoryListResponse.class))
     )
     @ApiResponse(
             responseCode = "400",
@@ -54,9 +54,7 @@ public class NewsController {
                     schema = @Schema(implementation = PaginationErrorResponse.class),
                     examples = {@ExampleObject(value = "{\n\"message\": \"Номер страницы должен быть заполнен!\"\n}")})
     )
-    public ResponseEntity<NewsListResponse> findAll(@Valid NewsFilter filter) {
-        return ResponseEntity.ok(
-                mapper.newsListToNewsListResponse(service.findAll(filter))
-        );
+    public ResponseEntity<?> handleFindAll(@Valid CategoryFilter filter) {
+        return ResponseEntity.ok(mapper.categoryItemListToCategoryListResponse(service.findAll(filter)));
     }
 }

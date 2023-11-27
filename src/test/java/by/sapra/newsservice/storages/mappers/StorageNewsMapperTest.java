@@ -20,7 +20,7 @@ import static by.sapra.newsservice.testUtils.UserTestDataBuilder.aUser;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ExtendWith(SpringExtension.class)
-@ContextConfiguration(classes = StorageNewsMapperConf.class)
+@ContextConfiguration(classes = MapperConf.class)
 class StorageNewsMapperTest {
     @Autowired
     StorageNewsMapper mapper;
