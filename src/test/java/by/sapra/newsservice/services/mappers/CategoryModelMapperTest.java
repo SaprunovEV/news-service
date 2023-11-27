@@ -66,7 +66,6 @@ class CategoryModelMapperTest {
     private void assertCategory(CategoryModel expected, Category actual) {
         assertAll(() -> {
             assertNotNull(actual);
-            assertNotNull(actual.getNews());
             assertEquals(expected.getId(), actual.getId());
             assertEquals(expected.getNewsCount(), actual.getNewsCount());
             assertEquals(expected.getName(), actual.getName());
@@ -78,7 +77,6 @@ class CategoryModelMapperTest {
                 .newsCount(newsCount)
                 .name(name)
                 .id(id)
-                .news(new ArrayList<>())
                 .build();
     }
 }

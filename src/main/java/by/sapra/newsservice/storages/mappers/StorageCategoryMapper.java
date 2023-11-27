@@ -10,7 +10,6 @@ import java.util.List;
 import java.util.Map;
 
 import static org.mapstruct.ReportingPolicy.IGNORE;
-
 @Mapper(componentModel = "spring", unmappedTargetPolicy = IGNORE, uses = {StorageNewsMapper.class})
 public interface StorageCategoryMapper {
     default CategoryListModel entityListToCategoryListModel(List<CategoryEntity> expected, Map<Long, Long> countMap) {

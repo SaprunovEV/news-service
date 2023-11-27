@@ -97,7 +97,7 @@ class CategoryServiceTest  {
     }
 
     private static Category createCategory(long id, String name) {
-        return Category.builder().id(id).name(name).newsCount(id).news(new ArrayList<>()).build();
+        return Category.builder().id(id).name(name).newsCount(id).build();
     }
 
     private CategoryListModel createCategoryListModel(long count) {
@@ -116,7 +116,6 @@ class CategoryServiceTest  {
                 .id(id)
                 .name(name)
                 .newsCount(id)
-                .news(new ArrayList<>())
                 .build();
     }
 

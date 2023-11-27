@@ -68,7 +68,6 @@ class CategoryMapperTest {
 
     private Category createCategory(long id, String name, long newsCount) {
         return Category.builder()
-                .news(new ArrayList<>())
                 .newsCount(newsCount)
                 .name(name)
                 .id(id)
