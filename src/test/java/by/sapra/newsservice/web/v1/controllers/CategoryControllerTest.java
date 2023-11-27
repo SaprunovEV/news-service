@@ -101,10 +101,10 @@ class CategoryControllerTest extends AbstractErrorControllerTest {
     void whenFindById_thenReturnCorrectResponse() throws Exception {
         long id = 1;
 
-        CategoryWithNews category = createCategoryWithNews(3);
+        CategoryWithNews category = createCategoryWithNews(id, 3);
         when(service.findById(id)).thenReturn(category);
 
-        CategoryResponse categoryResponse = createCategoryResponseWithNews(3);
+        CategoryResponse categoryResponse = createCategoryResponseWithNews(id, 3);
         when(mapper.categoryToCategoryResponse(category)).thenReturn(categoryResponse);
 
         String actual = mockMvc.perform(get(getUrl() + "/{id}", id))
@@ -118,7 +118,28 @@ class CategoryControllerTest extends AbstractErrorControllerTest {
         verify(mapper, times(1)).categoryToCategoryResponse(category);
     }
 
-    private CategoryResponse createCategoryResponseWithNews(int count) {
+    @Test
+    void whenFindById_withAnotherData_thenReturnCorrectResponse() throws Exception {
+        long id = 2;
+
+        CategoryWithNews category = createCategoryWithNews(id, 3);
+        when(service.findById(id)).thenReturn(category);
+
+        CategoryResponse categoryResponse = createCategoryResponseWithNews(id, 3);
+        when(mapper.categoryToCategoryResponse(category)).thenReturn(categoryResponse);
+
+        String actual = mockMvc.perform(get(getUrl() + "/{id}", id))
+                .andReturn().getResponse().getContentAsString();
+
+        String expected = StringTestUtils.readStringFromResources("/responses/v1/categories/find_by_id_"+id+"_response.json");
+
+        JsonAssert.assertJsonEquals(expected, actual);
+
+        verify(service, times(1)).findById(id);
+        verify(mapper, times(1)).categoryToCategoryResponse(category);
+    }
+
+    private CategoryResponse createCategoryResponseWithNews(long id, int count) {
         ArrayList<NewsItem> list = new ArrayList<>();
 
         for (long i = 0; i < count; i++) {
@@ -126,13 +147,13 @@ class CategoryControllerTest extends AbstractErrorControllerTest {
         }
 
         return CategoryResponse.builder()
-                .id(1L)
-                .name("Test category 1")
+                .id(id)
+                .name("Test category " + id)
                 .news(list)
                 .build();
     }
 
-    private CategoryWithNews createCategoryWithNews(int countOfNews) {
+    private CategoryWithNews createCategoryWithNews(long id, int countOfNews) {
         List<News> news = createNewsList(countOfNews);
 
         for (long i = 0; i < countOfNews; i++) {
@@ -140,7 +161,8 @@ class CategoryControllerTest extends AbstractErrorControllerTest {
         }
 
         return CategoryWithNews.builder()
-                .id(1L)
+                .id(id)
+                .name("Test category " + id)
                 .news(news)
                 .build();
     }
