@@ -3,9 +3,11 @@ package by.sapra.newsservice.storages.mappers;
 import by.sapra.newsservice.models.CategoryEntity;
 import by.sapra.newsservice.storages.models.CategoryListModel;
 import by.sapra.newsservice.storages.models.CategoryModel;
+import by.sapra.newsservice.storages.reposytory.CommentRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -23,6 +25,9 @@ class StorageCategoryMapperTest {
 
     @Autowired
     StorageCategoryMapper mapper;
+
+    @MockBean
+    CommentRepository commentRepository;
 
     @Test
     void shouldMapEntityToCategoryModel() throws Exception {
