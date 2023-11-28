@@ -7,11 +7,14 @@ import by.sapra.newsservice.services.models.ApplicationModel;
 import by.sapra.newsservice.services.models.Category;
 import by.sapra.newsservice.services.models.CategoryFilter;
 import by.sapra.newsservice.storages.CategoryStorage;
+import by.sapra.newsservice.storages.models.FullCategoryModel;
 import by.sapra.newsservice.web.v1.controllers.CategoryWithNews;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
+import java.text.MessageFormat;
 import java.util.List;
+import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -25,6 +28,24 @@ public class DatabaseCategoryService implements CategoryService {
 
     @Override
     public ApplicationModel<CategoryWithNews, CategoryNotFound> findById(long id) {
-        return null;
+        Optional<FullCategoryModel> optional = storage.findById(id);
+        return new ApplicationModel<>() {
+            @Override
+            public CategoryWithNews getData() {
+                return mapper.categoryModelToFullCategory(optional.get());
+            }
+
+            @Override
+            public CategoryNotFound getError() {
+                return CategoryNotFound.builder()
+                        .message(MessageFormat.format("Категория с ID {0} не найдена!", id))
+                        .build();
+            }
+
+            @Override
+            public boolean hasError() {
+                return optional.isEmpty();
+            }
+        };
     }
 }
