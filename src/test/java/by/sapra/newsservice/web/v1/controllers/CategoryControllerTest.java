@@ -10,17 +10,16 @@ import by.sapra.newsservice.testUtils.StringTestUtils;
 import by.sapra.newsservice.web.v1.AbstractErrorControllerTest;
 import by.sapra.newsservice.web.v1.mappers.CategoryMapper;
 import by.sapra.newsservice.web.v1.mappers.ErrorMapper;
-import by.sapra.newsservice.web.v1.models.CategoryItem;
-import by.sapra.newsservice.web.v1.models.CategoryListResponse;
-import by.sapra.newsservice.web.v1.models.CategoryResponse;
-import by.sapra.newsservice.web.v1.models.NewsItem;
+import by.sapra.newsservice.web.v1.models.*;
 import net.javacrumbs.jsonunit.JsonAssert;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -154,6 +153,48 @@ class CategoryControllerTest extends AbstractErrorControllerTest {
 
         verify(service, times(1)).findById(id);
         verify(mapper, times(1)).categoryToCategoryResponse(category);
+    }
+
+    @Test
+    void whenCategoryNotFound_thenReturnError() throws Exception {
+        long id = 2;
+
+        CategoryWithNews category = createCategoryWithNews(id, 3);
+        ApplicationModel<CategoryWithNews, CategoryNotFound> model = mock(ApplicationModel.class);
+        when(service.findById(id)).thenReturn(model);
+        when(model.hasError()).thenReturn(true);
+        CategoryNotFound categoryNotFoundError = createCategoryNotFoundError(id);
+        when(model.getError()).thenReturn(categoryNotFoundError);
+
+        when(errorMapper.errorToCategoryErrorResponse(categoryNotFoundError)).thenReturn(createCategoryErrorResponse(id));
+
+        MockHttpServletResponse response = mockMvc.perform(get(getUrl() + "/{id}", id))
+                .andExpect(status().isNotFound())
+                .andReturn().getResponse();
+
+        response.setCharacterEncoding("UTF-8");
+
+        String actual = response.getContentAsString();
+
+        String expected = StringTestUtils.readStringFromResources("/responses/v1/categories/category_not_found_error_response.json");
+
+
+        JsonAssert.assertJsonEquals(expected, actual);
+
+        verify(service, times(1)).findById(id);
+        verify(errorMapper, times(1)).errorToCategoryErrorResponse(model.getError());
+    }
+
+    private ErrorResponse createCategoryErrorResponse(long id) {
+        return CategoryErrorResponse.builder()
+                .message(MessageFormat.format("Категория с {0} не найдена!", id))
+                .build();
+    }
+
+    private CategoryNotFound createCategoryNotFoundError(long id) {
+        return CategoryNotFound.builder()
+                .message(MessageFormat.format("Категория с {0} не найдена!", id))
+                .build();
     }
 
     private CategoryResponse createCategoryResponseWithNews(long id, int count) {

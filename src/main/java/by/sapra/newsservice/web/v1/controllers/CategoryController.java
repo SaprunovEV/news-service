@@ -17,6 +17,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -68,9 +69,9 @@ public class CategoryController {
     public ResponseEntity<?> handleFindById(@PathVariable(name = "id") Long id) {
         ApplicationModel<CategoryWithNews, CategoryNotFound> model = service.findById(id);
 
-        if (!model.hasError()) {
-            return ResponseEntity.ok(mapper.categoryToCategoryResponse(model.getData()));
+        if (model.hasError()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body(errorMapper.errorToCategoryErrorResponse(model.getError()));
         }
-        return ResponseEntity.ok(errorMapper.errorToCategoryErrorResponse(model.getError()));
+        return ResponseEntity.ok(mapper.categoryToCategoryResponse(model.getData()));
     }
 }
