@@ -1,8 +1,11 @@
 package by.sapra.newsservice.web.v1.controllers;
 
+import by.sapra.newsservice.models.errors.CategoryNotFound;
 import by.sapra.newsservice.services.CategoryService;
+import by.sapra.newsservice.services.models.ApplicationModel;
 import by.sapra.newsservice.services.models.CategoryFilter;
 import by.sapra.newsservice.web.v1.mappers.CategoryMapper;
+import by.sapra.newsservice.web.v1.mappers.ErrorMapper;
 import by.sapra.newsservice.web.v1.models.CategoryListResponse;
 import by.sapra.newsservice.web.v1.models.PaginationErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -27,6 +30,8 @@ import org.springframework.web.bind.annotation.RestController;
 public class CategoryController {
     private final CategoryService service;
     private final CategoryMapper mapper;
+    private final ErrorMapper errorMapper;
+
     @GetMapping
     @Operation(
             summary = "Get all categories.",
@@ -61,6 +66,11 @@ public class CategoryController {
 
     @GetMapping("/{id}")
     public ResponseEntity<?> handleFindById(@PathVariable(name = "id") Long id) {
-        return ResponseEntity.ok(mapper.categoryToCategoryResponse(service.findById(id)));
+        ApplicationModel<CategoryWithNews, CategoryNotFound> model = service.findById(id);
+
+        if (!model.hasError()) {
+            return ResponseEntity.ok(mapper.categoryToCategoryResponse(model.getData()));
+        }
+        return ResponseEntity.ok(errorMapper.errorToCategoryErrorResponse(model.getError()));
     }
 }

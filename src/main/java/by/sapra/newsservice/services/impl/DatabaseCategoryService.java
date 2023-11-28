@@ -1,7 +1,9 @@
 package by.sapra.newsservice.services.impl;
 
+import by.sapra.newsservice.models.errors.CategoryNotFound;
 import by.sapra.newsservice.services.CategoryService;
 import by.sapra.newsservice.services.mappers.CategoryModelMapper;
+import by.sapra.newsservice.services.models.ApplicationModel;
 import by.sapra.newsservice.services.models.Category;
 import by.sapra.newsservice.services.models.CategoryFilter;
 import by.sapra.newsservice.storages.CategoryStorage;
@@ -22,7 +24,7 @@ public class DatabaseCategoryService implements CategoryService {
     }
 
     @Override
-    public CategoryWithNews findById(long id) {
+    public ApplicationModel<CategoryWithNews, CategoryNotFound> findById(long id) {
         return null;
     }
 }

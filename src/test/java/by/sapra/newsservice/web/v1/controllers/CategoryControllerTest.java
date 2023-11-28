@@ -1,12 +1,15 @@
 package by.sapra.newsservice.web.v1.controllers;
 
+import by.sapra.newsservice.models.errors.CategoryNotFound;
 import by.sapra.newsservice.services.CategoryService;
+import by.sapra.newsservice.services.models.ApplicationModel;
 import by.sapra.newsservice.services.models.Category;
 import by.sapra.newsservice.services.models.CategoryFilter;
 import by.sapra.newsservice.services.models.News;
 import by.sapra.newsservice.testUtils.StringTestUtils;
 import by.sapra.newsservice.web.v1.AbstractErrorControllerTest;
 import by.sapra.newsservice.web.v1.mappers.CategoryMapper;
+import by.sapra.newsservice.web.v1.mappers.ErrorMapper;
 import by.sapra.newsservice.web.v1.models.CategoryItem;
 import by.sapra.newsservice.web.v1.models.CategoryListResponse;
 import by.sapra.newsservice.web.v1.models.CategoryResponse;
@@ -32,6 +35,8 @@ class CategoryControllerTest extends AbstractErrorControllerTest {
     private CategoryService service;
     @MockBean
     private CategoryMapper mapper;
+    @MockBean
+    private ErrorMapper errorMapper;
 
     @Test
     void whenFindAll_thenReturnOk() throws Exception {
@@ -93,6 +98,12 @@ class CategoryControllerTest extends AbstractErrorControllerTest {
 
     @Test
     void shouldReturnOkFromCategoryById() throws Exception {
+        CategoryWithNews category = createCategoryWithNews(1, 3);
+        ApplicationModel model = mock(ApplicationModel.class);
+        when(service.findById(1)).thenReturn(model);
+        when(model.hasError()).thenReturn(false);
+        when(model.getData()).thenReturn(category);
+
         mockMvc.perform(get(getUrl() + "/{id}", 1))
                 .andExpect(status().isOk());
     }
@@ -102,7 +113,10 @@ class CategoryControllerTest extends AbstractErrorControllerTest {
         long id = 1;
 
         CategoryWithNews category = createCategoryWithNews(id, 3);
-        when(service.findById(id)).thenReturn(category);
+        ApplicationModel model = mock(ApplicationModel.class);
+        when(service.findById(id)).thenReturn(model);
+        when(model.hasError()).thenReturn(false);
+        when(model.getData()).thenReturn(category);
 
         CategoryResponse categoryResponse = createCategoryResponseWithNews(id, 3);
         when(mapper.categoryToCategoryResponse(category)).thenReturn(categoryResponse);
@@ -123,7 +137,10 @@ class CategoryControllerTest extends AbstractErrorControllerTest {
         long id = 2;
 
         CategoryWithNews category = createCategoryWithNews(id, 3);
-        when(service.findById(id)).thenReturn(category);
+        ApplicationModel<CategoryWithNews, CategoryNotFound> model = mock(ApplicationModel.class);
+        when(service.findById(id)).thenReturn(model);
+        when(model.hasError()).thenReturn(false);
+        when(model.getData()).thenReturn(category);
 
         CategoryResponse categoryResponse = createCategoryResponseWithNews(id, 3);
         when(mapper.categoryToCategoryResponse(category)).thenReturn(categoryResponse);
