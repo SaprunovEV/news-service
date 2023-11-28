@@ -32,7 +32,8 @@ public class DatabaseCategoryStorage implements CategoryStorage {
 
     @Override
     public Optional<FullCategoryModel> findById(long id) {
-        return Optional.empty();
+        Optional<CategoryEntity> categoryOptional = repository.findById(id);
+        return Optional.ofNullable(mapper.entityToFullCategory(categoryOptional.orElse(null)));
     }
 
     private CategoryListModel mapListModel(Page<CategoryEntity> page) {

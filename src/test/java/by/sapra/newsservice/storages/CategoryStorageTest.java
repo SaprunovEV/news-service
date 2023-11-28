@@ -6,6 +6,7 @@ import by.sapra.newsservice.services.models.CategoryFilter;
 import by.sapra.newsservice.storages.mappers.StorageCategoryMapper;
 import by.sapra.newsservice.storages.models.CategoryListModel;
 import by.sapra.newsservice.storages.models.CategoryModel;
+import by.sapra.newsservice.storages.models.FullCategoryModel;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -13,6 +14,7 @@ import org.springframework.test.context.ContextConfiguration;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 import static by.sapra.newsservice.testUtils.CategoryTestDataBuilder.aCategory;
@@ -77,6 +79,40 @@ class CategoryStorageTest extends AbstractDataTest {
         assertEquals(expected, actual);
 
         verify(mapper, times(1)).entityListToCategoryListModel(eq(entities), eq(countMap));
+    }
+
+    @Test
+    void shouldReturnEmptyOptionalIfCategoryWillNotPresent() throws Exception {
+        Optional<FullCategoryModel> actual = storage.findById(100L);
+
+        assertTrue(actual.isEmpty());
+    }
+
+
+    @Test
+    void shouldReturnCorrectCategory() throws Exception {
+
+        CategoryEntity expected = getTestDbFacade().save(aCategory().withName("test 1"));
+
+        getTestDbFacade().save(aCategory().withName("test 2"));
+        getTestDbFacade().save(aCategory().withName("test 3"));
+        getTestDbFacade().save(aCategory().withName("test 4"));
+
+        when(mapper.entityToFullCategory(expected)).thenReturn(FullCategoryModel.builder()
+                        .name(expected.getName())
+                        .id(expected.getId())
+                .build());
+
+        Optional<FullCategoryModel> actual = storage.findById(expected.getId());
+
+        assertAll(() -> {
+            assertTrue(actual.isPresent());
+            CategoryEntity category = getTestDbFacade().find(expected.getId(), CategoryEntity.class);
+            assertEquals(category.getId(), actual.get().getId());
+            assertEquals(category.getName(), actual.get().getName());
+        });
+
+        verify(mapper, times(1)).entityToFullCategory(expected);
     }
 
     private List<CategoryModel> createListCategoryModel(List<CategoryEntity> expected, Map<Long, Long> countMap) {
