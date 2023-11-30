@@ -19,5 +19,5 @@ public interface CategoryModelMapper {
 
     Category categoryModelToCategory(CategoryModel categoryModel);
 
-    CategoryWithNews categoryModelToFullCategory(FullCategoryModel fullCategoryModel);
+    CategoryWithNews fullCategoryToCategoryWithNews(FullCategoryModel fullCategoryModel);
 }

@@ -52,7 +52,7 @@ class CategoryModelMapperTest {
         String name = "name";
         FullCategoryModel expected = createCategoryFullModel(id, name);
 
-        CategoryWithNews actual = mapper.categoryModelToFullCategory(expected);
+        CategoryWithNews actual = mapper.fullCategoryToCategoryWithNews(expected);
 
         assertAll(() -> {
             assertNotNull(actual);

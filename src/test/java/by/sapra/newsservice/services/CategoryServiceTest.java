@@ -15,7 +15,6 @@ import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mockito;
-import org.mockito.stubbing.OngoingStubbing;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
@@ -100,7 +99,7 @@ class CategoryServiceTest  {
                         .name("test name")
                 .build());
         when(storage.findById(id)).thenReturn(expected);
-        when(mapper.categoryModelToFullCategory(expected.get())).thenReturn(CategoryWithNews.builder()
+        when(mapper.fullCategoryToCategoryWithNews(expected.get())).thenReturn(CategoryWithNews.builder()
                 .news(new ArrayList<>())
                 .id(id)
                 .name("test name")
