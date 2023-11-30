@@ -3,9 +3,11 @@ package by.sapra.newsservice.storages.mappers;
 import by.sapra.newsservice.models.NewsEntity;
 import by.sapra.newsservice.storages.models.NewsListModel;
 import by.sapra.newsservice.storages.models.NewsModel;
+import by.sapra.newsservice.storages.reposytory.CommentRepository;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -24,6 +26,9 @@ import static org.junit.jupiter.api.Assertions.*;
 class StorageNewsMapperTest {
     @Autowired
     StorageNewsMapper mapper;
+
+    @MockBean
+    CommentRepository commentRepository;
 
 
     @Test

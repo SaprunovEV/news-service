@@ -1,8 +1,11 @@
 package by.sapra.newsservice.web.v1.mappers;
 
 import by.sapra.newsservice.services.models.Category;
+import by.sapra.newsservice.services.models.News;
+import by.sapra.newsservice.web.v1.controllers.CategoryWithNews;
 import by.sapra.newsservice.web.v1.models.CategoryItem;
 import by.sapra.newsservice.web.v1.models.CategoryListResponse;
+import by.sapra.newsservice.web.v1.models.CategoryResponse;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,6 +39,36 @@ class CategoryMapperTest {
         CategoryListResponse actual = mapper.categoryItemListToCategoryListResponse(expected);
 
         assertCategoryListResponse(expected, actual);
+    }
+
+    @Test
+    void shouldMapFullCategoryModelToCategoryWithNews() throws Exception {
+        long id = 1L;
+        String name = "name";
+        CategoryWithNews expected = createCategoryFullModel(id, name);
+
+        CategoryResponse actual = mapper.categoryToCategoryResponse(expected);
+
+        assertAll(() -> {
+            assertNotNull(actual);
+            assertNotNull(actual.getNews());
+            assertEquals(3, actual.getNews().size());
+            assertEquals(name, actual.getName());
+            assertEquals(id, actual.getId());
+        });
+    }
+
+    private CategoryWithNews createCategoryFullModel(long id, String name) {
+
+        return CategoryWithNews.builder()
+                .id(id)
+                .name(name)
+                .news(List.of(
+                        News.builder().build(),
+                        News.builder().build(),
+                        News.builder().build()
+                ))
+                .build();
     }
 
     private void assertCategoryListResponse(List<Category> expected, CategoryListResponse actual) {

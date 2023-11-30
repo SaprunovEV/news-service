@@ -1,11 +1,15 @@
 package by.sapra.newsservice.services;
 
+import by.sapra.newsservice.models.errors.CategoryNotFound;
 import by.sapra.newsservice.services.mappers.CategoryModelMapper;
+import by.sapra.newsservice.services.models.ApplicationModel;
 import by.sapra.newsservice.services.models.Category;
 import by.sapra.newsservice.services.models.CategoryFilter;
 import by.sapra.newsservice.storages.CategoryStorage;
 import by.sapra.newsservice.storages.models.CategoryListModel;
 import by.sapra.newsservice.storages.models.CategoryModel;
+import by.sapra.newsservice.storages.models.FullCategoryModel;
+import by.sapra.newsservice.web.v1.controllers.CategoryWithNews;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -17,9 +21,9 @@ import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertIterableEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
@@ -83,6 +87,49 @@ class CategoryServiceTest  {
 
         verify(storage, times(1)).findAll(filter);
         verify(mapper, times(1)).categoryListModelToCategoryList(categoryListModel);
+    }
+
+    @Test
+    void shouldReturnModelWithDataIfCategoryWillPresentToStorage() throws Exception {
+        long id = 1;
+
+        Optional<FullCategoryModel> expected = Optional.of(FullCategoryModel.builder()
+                        .news(new ArrayList<>())
+                        .id(id)
+                        .name("test name")
+                .build());
+        when(storage.findById(id)).thenReturn(expected);
+        when(mapper.fullCategoryToCategoryWithNews(expected.get())).thenReturn(CategoryWithNews.builder()
+                .news(new ArrayList<>())
+                .id(id)
+                .name("test name")
+                .build());
+
+        ApplicationModel<CategoryWithNews, CategoryNotFound> actual = service.findById(id);
+
+        assertAll(() -> {
+            assertFalse(actual.hasError());
+            assertNotNull(actual.getData());
+            assertNotNull(actual.getData().getNews());
+            assertEquals(expected.get().getId(), actual.getData().getId());
+            assertEquals(expected.get().getName(), actual.getData().getName());
+        });
+    }
+
+    @Test
+    void shouldReturnError_whenStorageHaveNotCategory() throws Exception {
+        long id = 1L;
+        when(storage.findById(id)).thenReturn(Optional.empty());
+
+        ApplicationModel<CategoryWithNews, CategoryNotFound> actual = service.findById(id);
+
+        assertAll(() -> {
+            assertNotNull(actual);
+            assertTrue(actual.hasError());
+            assertNotNull(actual.getError());
+        });
+
+        verify(storage, times(1)).findById(id);
     }
 
     @NotNull
