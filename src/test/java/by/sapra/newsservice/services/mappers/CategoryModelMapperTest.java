@@ -2,9 +2,13 @@ package by.sapra.newsservice.services.mappers;
 import by.sapra.newsservice.services.models.Category;
 import by.sapra.newsservice.storages.models.CategoryListModel;
 import by.sapra.newsservice.storages.models.CategoryModel;
+import by.sapra.newsservice.storages.models.FullCategoryModel;
+import by.sapra.newsservice.storages.models.NewsModel;
+import by.sapra.newsservice.web.v1.controllers.CategoryWithNews;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
@@ -16,6 +20,9 @@ import static org.junit.jupiter.api.Assertions.*;
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = MapperConf.class)
 class CategoryModelMapperTest {
+
+    @MockBean
+    NewsModelMapper newsModelMapper;
 
     @Autowired
     public CategoryModelMapper mapper;
@@ -37,6 +44,36 @@ class CategoryModelMapperTest {
         List<Category> actual = mapper.categoryListModelToCategoryList(expected);
 
         assertCategoryList(expected, actual);
+    }
+
+    @Test
+    void shouldMapFullCategoryModelToCategoryWithNews() throws Exception {
+        long id = 1L;
+        String name = "name";
+        FullCategoryModel expected = createCategoryFullModel(id, name);
+
+        CategoryWithNews actual = mapper.categoryModelToFullCategory(expected);
+
+        assertAll(() -> {
+            assertNotNull(actual);
+            assertNotNull(actual.getNews());
+            assertEquals(3, actual.getNews().size());
+            assertEquals(name, actual.getName());
+            assertEquals(id, actual.getId());
+        });
+    }
+
+    private FullCategoryModel createCategoryFullModel(long id, String name) {
+
+        return FullCategoryModel.builder()
+                .id(id)
+                .name(name)
+                .news(List.of(
+                        NewsModel.builder().build(),
+                        NewsModel.builder().build(),
+                        NewsModel.builder().build()
+                ))
+                .build();
     }
 
     private void assertCategoryList(CategoryListModel expected, List<Category> actual) {
