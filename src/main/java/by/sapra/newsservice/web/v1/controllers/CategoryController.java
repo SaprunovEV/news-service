@@ -6,6 +6,7 @@ import by.sapra.newsservice.services.models.ApplicationModel;
 import by.sapra.newsservice.services.models.CategoryFilter;
 import by.sapra.newsservice.web.v1.mappers.CategoryMapper;
 import by.sapra.newsservice.web.v1.models.CategoryListResponse;
+import by.sapra.newsservice.web.v1.models.CategoryResponse;
 import by.sapra.newsservice.web.v1.models.PaginationErrorResponse;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -64,6 +65,23 @@ public class CategoryController {
     }
 
     @GetMapping("/{id}")
+    @Operation(
+            summary = "Get category by id.",
+            description = "Get category by id. Return category with news.",
+            method = "GET",
+            tags = {"category", "V1"}
+    )
+    @ApiResponse(
+            responseCode = "200",
+            content = @Content(schema = @Schema(implementation = CategoryResponse.class))
+    )
+    @ApiResponse(
+            responseCode = "404",
+            description = "Category id not found.",
+            content = @Content(
+                    schema = @Schema(implementation = CategoryNotFound.class),
+                    examples = {@ExampleObject(value = "{\n\"message\": \"Категория по ID 3 не найдена!\"\n}")})
+    )
     public ResponseEntity<?> handleFindById(@PathVariable(name = "id") Long id) {
         ApplicationModel<CategoryWithNews, CategoryNotFound> model = service.findById(id);
 
