@@ -3,7 +3,7 @@ package by.sapra.newsservice.storages.mappers;
 import by.sapra.newsservice.models.CategoryEntity;
 import by.sapra.newsservice.storages.models.CategoryListModel;
 import by.sapra.newsservice.storages.models.CategoryModel;
-import by.sapra.newsservice.storages.reposytory.CommentRepository;
+import by.sapra.newsservice.storages.models.FullCategoryModel;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,6 +18,8 @@ import java.util.stream.Collectors;
 
 import static by.sapra.newsservice.testUtils.CategoryTestDataBuilder.aCategory;
 import static org.junit.jupiter.api.Assertions.*;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
 @ContextConfiguration(classes = MapperConf.class)
@@ -27,7 +29,7 @@ class StorageCategoryMapperTest {
     StorageCategoryMapper mapper;
 
     @MockBean
-    CommentRepository commentRepository;
+    StorageCategory2NewsMapper category2NewsMapper;
 
     @Test
     void shouldMapEntityToCategoryModel() throws Exception {
@@ -48,6 +50,29 @@ class StorageCategoryMapperTest {
                 countMap);
 
         assertCategoryListModel(expected, actual);
+    }
+
+    @Test
+    void shouldMapEntityToFullCategory() throws Exception {
+        CategoryEntity expected = aCategory().build();
+        expected.setId(1L);
+
+        when(category2NewsMapper.linksToNewsModelList(any())).thenReturn(new ArrayList<>());
+
+        FullCategoryModel actual = mapper.entityToFullCategory(expected);
+
+        assertFullCategory(expected, actual);
+
+        verify(category2NewsMapper, times(1)).linksToNewsModelList(any());
+    }
+
+    private void assertFullCategory(CategoryEntity expected, FullCategoryModel actual) {
+        assertAll(() -> {
+            assertNotNull(actual);
+            assertEquals(expected.getId(), actual.getId());
+            assertEquals(expected.getName(), actual.getName());
+            assertEquals(expected.getCategory2News().size(), actual.getNews().size());
+        });
     }
 
     private void assertCategoryListModel(List<CategoryEntity> expected, CategoryListModel actual) {

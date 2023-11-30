@@ -13,7 +13,7 @@ import static org.mapstruct.ReportingPolicy.IGNORE;
 @Mapper(componentModel = "spring", unmappedTargetPolicy = IGNORE)
 public interface StorageCategory2NewsMapper {
 
-    default List<NewsModel> linksToNewsEntityList(List<Category2News> category2News) {
+    default List<NewsModel> linksToNewsModelList(List<Category2News> category2News) {
 
         return category2News.stream().map(this::lincToNewsEntity).toList();
     }

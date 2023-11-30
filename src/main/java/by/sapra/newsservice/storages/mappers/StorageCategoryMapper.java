@@ -22,6 +22,6 @@ public interface StorageCategoryMapper {
 
     @Mapping(source = "count", target = "newsCount")
     CategoryModel entityToCategoryModel(CategoryEntity categoryEntity, long count);
-
+    @Mapping(source = "category2News", target = "news")
     FullCategoryModel entityToFullCategory(CategoryEntity expected);
 }
