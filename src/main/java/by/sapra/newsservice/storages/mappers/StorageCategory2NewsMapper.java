@@ -15,8 +15,8 @@ public interface StorageCategory2NewsMapper {
 
     default List<NewsModel> linksToNewsModelList(List<Category2News> category2News) {
 
-        return category2News.stream().map(this::lincToNewsEntity).toList();
+        return category2News.stream().map(this::lincToNewsModel).toList();
     }
 
-    NewsModel lincToNewsEntity(Category2News category2News);
+    NewsModel lincToNewsModel(Category2News category2News);
 }
