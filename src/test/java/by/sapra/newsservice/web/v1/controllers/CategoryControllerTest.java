@@ -9,7 +9,6 @@ import by.sapra.newsservice.services.models.News;
 import by.sapra.newsservice.testUtils.StringTestUtils;
 import by.sapra.newsservice.web.v1.AbstractErrorControllerTest;
 import by.sapra.newsservice.web.v1.mappers.CategoryMapper;
-import by.sapra.newsservice.web.v1.mappers.ErrorMapper;
 import by.sapra.newsservice.web.v1.models.*;
 import net.javacrumbs.jsonunit.JsonAssert;
 import org.jetbrains.annotations.NotNull;
@@ -34,8 +33,6 @@ class CategoryControllerTest extends AbstractErrorControllerTest {
     private CategoryService service;
     @MockBean
     private CategoryMapper mapper;
-    @MockBean
-    private ErrorMapper errorMapper;
 
     @Test
     void whenFindAll_thenReturnOk() throws Exception {
@@ -166,8 +163,6 @@ class CategoryControllerTest extends AbstractErrorControllerTest {
         CategoryNotFound categoryNotFoundError = createCategoryNotFoundError(id);
         when(model.getError()).thenReturn(categoryNotFoundError);
 
-        when(errorMapper.errorToCategoryErrorResponse(categoryNotFoundError)).thenReturn(createCategoryErrorResponse(id));
-
         MockHttpServletResponse response = mockMvc.perform(get(getUrl() + "/{id}", id))
                 .andExpect(status().isNotFound())
                 .andReturn().getResponse();
@@ -182,13 +177,6 @@ class CategoryControllerTest extends AbstractErrorControllerTest {
         JsonAssert.assertJsonEquals(expected, actual);
 
         verify(service, times(1)).findById(id);
-        verify(errorMapper, times(1)).errorToCategoryErrorResponse(model.getError());
-    }
-
-    private ErrorResponse createCategoryErrorResponse(long id) {
-        return CategoryErrorResponse.builder()
-                .message(MessageFormat.format("Категория с {0} не найдена!", id))
-                .build();
     }
 
     private CategoryNotFound createCategoryNotFoundError(long id) {
