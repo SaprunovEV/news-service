@@ -82,6 +82,13 @@ public class CategoryController {
                     schema = @Schema(implementation = CategoryNotFound.class),
                     examples = {@ExampleObject(value = "{\n\"message\": \"Категория по ID 3 не найдена!\"\n}")})
     )
+    @ApiResponse(
+            responseCode = "400",
+            description = "Category id should positive.",
+            content = @Content(
+                    schema = @Schema(implementation = CategoryNotFound.class),
+                    examples = {@ExampleObject(value = "{\n\"message\": \"Параметр ID должен быть положителен!\"\n}")})
+    )
     public ResponseEntity<?> handleFindById(@Valid CategoryId id) {
         ApplicationModel<CategoryWithNews, CategoryNotFound> model = service.findById(id.getId());
 
