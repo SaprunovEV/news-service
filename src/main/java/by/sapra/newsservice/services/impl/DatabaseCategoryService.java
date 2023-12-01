@@ -8,7 +8,7 @@ import by.sapra.newsservice.services.models.Category;
 import by.sapra.newsservice.services.models.CategoryFilter;
 import by.sapra.newsservice.storages.CategoryStorage;
 import by.sapra.newsservice.storages.models.FullCategoryModel;
-import by.sapra.newsservice.web.v1.controllers.CategoryWithNews;
+import by.sapra.newsservice.services.models.CategoryWithNews;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 

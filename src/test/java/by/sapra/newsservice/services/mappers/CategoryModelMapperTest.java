@@ -4,7 +4,7 @@ import by.sapra.newsservice.storages.models.CategoryListModel;
 import by.sapra.newsservice.storages.models.CategoryModel;
 import by.sapra.newsservice.storages.models.FullCategoryModel;
 import by.sapra.newsservice.storages.models.NewsModel;
-import by.sapra.newsservice.web.v1.controllers.CategoryWithNews;
+import by.sapra.newsservice.services.models.CategoryWithNews;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;

@@ -2,7 +2,7 @@ package by.sapra.newsservice.web.v1.mappers;
 
 import by.sapra.newsservice.services.models.Category;
 import by.sapra.newsservice.services.models.News;
-import by.sapra.newsservice.web.v1.controllers.CategoryWithNews;
+import by.sapra.newsservice.services.models.CategoryWithNews;
 import by.sapra.newsservice.web.v1.models.CategoryItem;
 import by.sapra.newsservice.web.v1.models.CategoryListResponse;
 import by.sapra.newsservice.web.v1.models.CategoryResponse;

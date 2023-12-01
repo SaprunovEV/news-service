@@ -9,7 +9,7 @@ import by.sapra.newsservice.storages.CategoryStorage;
 import by.sapra.newsservice.storages.models.CategoryListModel;
 import by.sapra.newsservice.storages.models.CategoryModel;
 import by.sapra.newsservice.storages.models.FullCategoryModel;
-import by.sapra.newsservice.web.v1.controllers.CategoryWithNews;
+import by.sapra.newsservice.services.models.CategoryWithNews;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;

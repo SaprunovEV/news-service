@@ -2,10 +2,7 @@ package by.sapra.newsservice.web.v1.controllers;
 
 import by.sapra.newsservice.models.errors.CategoryError;
 import by.sapra.newsservice.services.CategoryService;
-import by.sapra.newsservice.services.models.ApplicationModel;
-import by.sapra.newsservice.services.models.Category;
-import by.sapra.newsservice.services.models.CategoryFilter;
-import by.sapra.newsservice.services.models.News;
+import by.sapra.newsservice.services.models.*;
 import by.sapra.newsservice.testUtils.StringTestUtils;
 import by.sapra.newsservice.web.v1.AbstractErrorControllerTest;
 import by.sapra.newsservice.web.v1.mappers.CategoryMapper;

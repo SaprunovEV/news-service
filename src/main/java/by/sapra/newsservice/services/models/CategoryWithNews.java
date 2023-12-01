@@ -1,6 +1,5 @@
-package by.sapra.newsservice.web.v1.controllers;
+package by.sapra.newsservice.services.models;
 
-import by.sapra.newsservice.services.models.News;
 import lombok.Builder;
 import lombok.Data;
 

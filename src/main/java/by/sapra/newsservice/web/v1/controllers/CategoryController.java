@@ -4,6 +4,7 @@ import by.sapra.newsservice.models.errors.CategoryError;
 import by.sapra.newsservice.services.CategoryService;
 import by.sapra.newsservice.services.models.ApplicationModel;
 import by.sapra.newsservice.services.models.CategoryFilter;
+import by.sapra.newsservice.services.models.CategoryWithNews;
 import by.sapra.newsservice.web.v1.annotations.CreateNewCategoryDock;
 import by.sapra.newsservice.web.v1.mappers.CategoryMapper;
 import by.sapra.newsservice.web.v1.models.*;
