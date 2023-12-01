@@ -216,7 +216,7 @@ class CategoryControllerTest extends AbstractErrorControllerTest {
     }
 
     @Test
-    void whenCreateTheCategory_ThenReturnError() throws Exception {
+    void whenCreateTheCategory_ThenReturnSavedCategory() throws Exception {
         String name = "Test category 1";
         UpsertCategoryRequest request = createUpsertCategoryRequest(name);
 
@@ -231,6 +231,7 @@ class CategoryControllerTest extends AbstractErrorControllerTest {
                         post(getUrl())
                                 .contentType(APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
                 .andReturn()
                 .getResponse()
                 .getContentAsString();
