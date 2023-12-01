@@ -96,6 +96,23 @@ public class CategoryController {
     }
 
     @PostMapping
+    @Operation(
+            summary = "Saved new category.",
+            description = "Saved new category. Return saved category.",
+            method = "POST",
+            tags = {"category", "V1"}
+    )
+    @ApiResponse(
+            responseCode = "200",
+            content = @Content(schema = @Schema(implementation = CategoryResponse.class))
+    )
+    @ApiResponse(
+            responseCode = "400",
+            description = "Category already exist.",
+            content = @Content(
+                    schema = @Schema(implementation = CategoryError.class),
+                    examples = {@ExampleObject(value = "{\n\"message\": \"Категория с именем бизнес уже существует!\"\n}")})
+    )
     public ResponseEntity<?> handleSaveCategory(@RequestBody UpsertCategoryRequest request) {
         ApplicationModel<CategoryWithNews, CategoryError> model =
                 service.saveCategory(mapper.requestToCategoryWithNews(request));
