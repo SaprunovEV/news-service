@@ -1,6 +1,6 @@
 package by.sapra.newsservice.web.v1.controllers;
 
-import by.sapra.newsservice.models.errors.CategoryNotFound;
+import by.sapra.newsservice.models.errors.CategoryError;
 import by.sapra.newsservice.services.CategoryService;
 import by.sapra.newsservice.services.models.ApplicationModel;
 import by.sapra.newsservice.services.models.CategoryFilter;
@@ -76,18 +76,18 @@ public class CategoryController {
             responseCode = "404",
             description = "Category id not found.",
             content = @Content(
-                    schema = @Schema(implementation = CategoryNotFound.class),
+                    schema = @Schema(implementation = CategoryError.class),
                     examples = {@ExampleObject(value = "{\n\"message\": \"Категория по ID 3 не найдена!\"\n}")})
     )
     @ApiResponse(
             responseCode = "400",
             description = "Category id should positive.",
             content = @Content(
-                    schema = @Schema(implementation = CategoryNotFound.class),
+                    schema = @Schema(implementation = CategoryError.class),
                     examples = {@ExampleObject(value = "{\n\"message\": \"Параметр ID должен быть положителен!\"\n}")})
     )
     public ResponseEntity<?> handleFindById(@Valid CategoryId id) {
-        ApplicationModel<CategoryWithNews, CategoryNotFound> model = service.findById(id.getId());
+        ApplicationModel<CategoryWithNews, CategoryError> model = service.findById(id.getId());
 
         if (model.hasError()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(model.getError());
@@ -97,8 +97,12 @@ public class CategoryController {
 
     @PostMapping
     public ResponseEntity<?> handleSaveCategory(@RequestBody UpsertCategoryRequest request) {
-        CategoryWithNews category = service.saveCategory(mapper.requestToCategoryWithNews(request));
+        ApplicationModel<CategoryWithNews, CategoryError> model =
+                service.saveCategory(mapper.requestToCategoryWithNews(request));
 
-        return ResponseEntity.status(CREATED).body(mapper.categoryToCategoryResponse(category));
+        if (model.hasError())
+            return ResponseEntity.badRequest().body(model.getError());
+
+        return ResponseEntity.status(CREATED).body(mapper.categoryToCategoryResponse(model.getData()));
     }
 }
