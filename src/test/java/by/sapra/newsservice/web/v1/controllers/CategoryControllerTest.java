@@ -23,7 +23,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import static org.mockito.Mockito.*;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = CategoryController.class)
@@ -211,6 +213,39 @@ class CategoryControllerTest extends AbstractErrorControllerTest {
         String expected = StringTestUtils.readStringFromResources("/responses/v1/errors/negative_id_error_response.json");
 
         JsonAssert.assertJsonEquals(expected, actual);
+    }
+
+    @Test
+    void whenCreateTheCategory_ThenReturnError() throws Exception {
+        String name = "Test category 1";
+        UpsertCategoryRequest request = createUpsertCategoryRequest(name);
+
+        CategoryWithNews category = createCategoryWithNews(0L, 0);
+        when(mapper.requestToCategoryWithNews(request)).thenReturn(category);
+        CategoryWithNews savedCategory = createCategoryWithNews(1L, 0);
+        when(service.saveCategory(category)).thenReturn(savedCategory);
+        when(mapper.categoryToCategoryResponse(savedCategory))
+                .thenReturn(createCategoryResponseWithNews(1L, 0));
+
+        String actual = mockMvc.perform(
+                        post(getUrl())
+                                .contentType(APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        String expected = StringTestUtils.readStringFromResources("/responses/v1/categories/save_new_category_request.json");
+
+        JsonAssert.assertJsonEquals(expected, actual);
+
+        verify(mapper, times(1)).requestToCategoryWithNews(request);
+        verify(service, times(1)).saveCategory(category);
+        verify(mapper, times(1)).categoryToCategoryResponse(savedCategory);
+    }
+
+    private UpsertCategoryRequest createUpsertCategoryRequest(String name) {
+        return UpsertCategoryRequest.builder().name(name).build();
     }
 
     private CategoryNotFound createCategoryNotFoundError(long id) {

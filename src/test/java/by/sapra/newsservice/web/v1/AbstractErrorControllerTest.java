@@ -1,6 +1,7 @@
 package by.sapra.newsservice.web.v1;
 
 import by.sapra.newsservice.testUtils.StringTestUtils;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import net.javacrumbs.jsonunit.JsonAssert;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
@@ -16,6 +17,8 @@ public abstract class AbstractErrorControllerTest {
     @Autowired
     protected MockMvc mockMvc;
 
+    @Autowired
+    protected ObjectMapper objectMapper;
     @Test
     void whenPageSizeNotSpecified_thenReturnError() throws Exception {
         String pageNumber = "0";

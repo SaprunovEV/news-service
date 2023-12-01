@@ -48,4 +48,9 @@ public class DatabaseCategoryService implements CategoryService {
             }
         };
     }
+
+    @Override
+    public CategoryWithNews saveCategory(CategoryWithNews category) {
+        return null;
+    }
 }

@@ -12,4 +12,6 @@ public interface CategoryService {
     List<Category> findAll(CategoryFilter filter);
 
     ApplicationModel<CategoryWithNews, CategoryNotFound> findById(long id);
+
+    CategoryWithNews saveCategory(CategoryWithNews category);
 }
