@@ -1,6 +1,6 @@
 package by.sapra.newsservice.services;
 
-import by.sapra.newsservice.models.errors.CategoryNotFound;
+import by.sapra.newsservice.models.errors.CategoryError;
 import by.sapra.newsservice.services.mappers.CategoryModelMapper;
 import by.sapra.newsservice.services.models.ApplicationModel;
 import by.sapra.newsservice.services.models.Category;
@@ -105,7 +105,7 @@ class CategoryServiceTest  {
                 .name("test name")
                 .build());
 
-        ApplicationModel<CategoryWithNews, CategoryNotFound> actual = service.findById(id);
+        ApplicationModel<CategoryWithNews, CategoryError> actual = service.findById(id);
 
         assertAll(() -> {
             assertFalse(actual.hasError());
@@ -121,7 +121,7 @@ class CategoryServiceTest  {
         long id = 1L;
         when(storage.findById(id)).thenReturn(Optional.empty());
 
-        ApplicationModel<CategoryWithNews, CategoryNotFound> actual = service.findById(id);
+        ApplicationModel<CategoryWithNews, CategoryError> actual = service.findById(id);
 
         assertAll(() -> {
             assertNotNull(actual);

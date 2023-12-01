@@ -1,6 +1,6 @@
 package by.sapra.newsservice.services.impl;
 
-import by.sapra.newsservice.models.errors.CategoryNotFound;
+import by.sapra.newsservice.models.errors.CategoryError;
 import by.sapra.newsservice.services.CategoryService;
 import by.sapra.newsservice.services.mappers.CategoryModelMapper;
 import by.sapra.newsservice.services.models.ApplicationModel;
@@ -27,7 +27,7 @@ public class DatabaseCategoryService implements CategoryService {
     }
 
     @Override
-    public ApplicationModel<CategoryWithNews, CategoryNotFound> findById(long id) {
+    public ApplicationModel<CategoryWithNews, CategoryError> findById(long id) {
         Optional<FullCategoryModel> optional = storage.findById(id);
         return new ApplicationModel<>() {
             @Override
@@ -36,8 +36,8 @@ public class DatabaseCategoryService implements CategoryService {
             }
 
             @Override
-            public CategoryNotFound getError() {
-                return CategoryNotFound.builder()
+            public CategoryError getError() {
+                return CategoryError.builder()
                         .message(MessageFormat.format("Категория с ID {0} не найдена!", id))
                         .build();
             }
@@ -50,7 +50,7 @@ public class DatabaseCategoryService implements CategoryService {
     }
 
     @Override
-    public CategoryWithNews saveCategory(CategoryWithNews category) {
+    public  ApplicationModel<CategoryWithNews, CategoryError>  saveCategory(CategoryWithNews category) {
         return null;
     }
 }

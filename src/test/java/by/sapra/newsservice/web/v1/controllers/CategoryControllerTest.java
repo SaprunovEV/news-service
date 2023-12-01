@@ -1,6 +1,6 @@
 package by.sapra.newsservice.web.v1.controllers;
 
-import by.sapra.newsservice.models.errors.CategoryNotFound;
+import by.sapra.newsservice.models.errors.CategoryError;
 import by.sapra.newsservice.services.CategoryService;
 import by.sapra.newsservice.services.models.ApplicationModel;
 import by.sapra.newsservice.services.models.Category;
@@ -135,7 +135,7 @@ class CategoryControllerTest extends AbstractErrorControllerTest {
         long id = 2;
 
         CategoryWithNews category = createCategoryWithNews(id, 3);
-        ApplicationModel<CategoryWithNews, CategoryNotFound> model = mock(ApplicationModel.class);
+        ApplicationModel<CategoryWithNews, CategoryError> model = mock(ApplicationModel.class);
         when(service.findById(id)).thenReturn(model);
         when(model.hasError()).thenReturn(false);
         when(model.getData()).thenReturn(category);
@@ -159,11 +159,11 @@ class CategoryControllerTest extends AbstractErrorControllerTest {
         long id = 2;
 
         CategoryWithNews category = createCategoryWithNews(id, 3);
-        ApplicationModel<CategoryWithNews, CategoryNotFound> model = mock(ApplicationModel.class);
+        ApplicationModel<CategoryWithNews, CategoryError> model = mock(ApplicationModel.class);
         when(service.findById(id)).thenReturn(model);
         when(model.hasError()).thenReturn(true);
-        CategoryNotFound categoryNotFoundError = createCategoryNotFoundError(id);
-        when(model.getError()).thenReturn(categoryNotFoundError);
+        CategoryError categoryErrorError = createCategoryNotFoundError(id);
+        when(model.getError()).thenReturn(categoryErrorError);
 
         MockHttpServletResponse response = mockMvc.perform(get(getUrl() + "/{id}", id))
                 .andExpect(status().isNotFound())
@@ -223,7 +223,10 @@ class CategoryControllerTest extends AbstractErrorControllerTest {
         CategoryWithNews category = createCategoryWithNews(0L, 0);
         when(mapper.requestToCategoryWithNews(request)).thenReturn(category);
         CategoryWithNews savedCategory = createCategoryWithNews(1L, 0);
-        when(service.saveCategory(category)).thenReturn(savedCategory);
+        ApplicationModel<CategoryWithNews, CategoryError> model = mock(ApplicationModel.class);
+        when(service.saveCategory(category)).thenReturn(model);
+        when(model.hasError()).thenReturn(false);
+        when(model.getData()).thenReturn(savedCategory);
         when(mapper.categoryToCategoryResponse(savedCategory))
                 .thenReturn(createCategoryResponseWithNews(1L, 0));
 
@@ -242,15 +245,60 @@ class CategoryControllerTest extends AbstractErrorControllerTest {
 
         verify(mapper, times(1)).requestToCategoryWithNews(request);
         verify(service, times(1)).saveCategory(category);
+        verify(model, times(1)).hasError();
+        verify(model, times(1)).getData();
         verify(mapper, times(1)).categoryToCategoryResponse(savedCategory);
+    }
+
+    @Test
+    void whenSavedExistingCategory_thenReturnError() throws Exception {
+        String name = "Test category 1";
+
+        UpsertCategoryRequest request = createUpsertCategoryRequest(name);
+
+        CategoryWithNews category = createCategoryWithNews(0L, 0);
+        when(mapper.requestToCategoryWithNews(request)).thenReturn(category);
+        ApplicationModel<CategoryWithNews, CategoryError> model = mock(ApplicationModel.class);
+        when(service.saveCategory(category)).thenReturn(model);
+        when(model.hasError()).thenReturn(true);
+        CategoryError categoryExist = createCategoryCategoryExist(name);
+        when(model.getError()).thenReturn(categoryExist);
+        when(model.getError()).thenReturn(categoryExist);
+
+        MockHttpServletResponse response = mockMvc.perform(
+                        post(getUrl())
+                                .contentType(APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andReturn()
+                .getResponse();
+
+        response.setCharacterEncoding("UTF-8");
+
+        String actual = response.getContentAsString();
+
+        String expected = StringTestUtils.readStringFromResources("/responses/v1/errors/save_existing_category_response.json");
+
+        JsonAssert.assertJsonEquals(expected, actual);
+
+        verify(mapper, times(1)).requestToCategoryWithNews(request);
+        verify(model, times(1)).hasError();
+        verify(model, times(1)).getError();
+        verify(service, times(1)).saveCategory(category);
+    }
+
+    private CategoryError createCategoryCategoryExist(String name) {
+        return CategoryError.builder()
+                .message(MessageFormat.format("Категория с именем {0} уже существует!", name))
+                .build();
     }
 
     private UpsertCategoryRequest createUpsertCategoryRequest(String name) {
         return UpsertCategoryRequest.builder().name(name).build();
     }
 
-    private CategoryNotFound createCategoryNotFoundError(long id) {
-        return CategoryNotFound.builder()
+    private CategoryError createCategoryNotFoundError(long id) {
+        return CategoryError.builder()
                 .message(MessageFormat.format("Категория с {0} не найдена!", id))
                 .build();
     }
