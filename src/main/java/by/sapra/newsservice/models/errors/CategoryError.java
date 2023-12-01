@@ -5,6 +5,6 @@ import lombok.Data;
 
 @Data
 @Builder
-public class CategoryNotFound {
+public class CategoryError {
     private String message;
 }
