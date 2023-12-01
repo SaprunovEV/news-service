@@ -113,7 +113,7 @@ public class CategoryController {
                     schema = @Schema(implementation = CategoryError.class),
                     examples = {@ExampleObject(value = "{\n\"message\": \"Категория с именем бизнес уже существует!\"\n}")})
     )
-    public ResponseEntity<?> handleSaveCategory(@RequestBody UpsertCategoryRequest request) {
+    public ResponseEntity<?> handleSaveCategory(@RequestBody @Valid UpsertCategoryRequest request) {
         ApplicationModel<CategoryWithNews, CategoryError> model =
                 service.saveCategory(mapper.requestToCategoryWithNews(request));
 

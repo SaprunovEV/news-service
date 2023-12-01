@@ -10,9 +10,13 @@ import by.sapra.newsservice.testUtils.StringTestUtils;
 import by.sapra.newsservice.web.v1.AbstractErrorControllerTest;
 import by.sapra.newsservice.web.v1.mappers.CategoryMapper;
 import by.sapra.newsservice.web.v1.models.*;
+import net.bytebuddy.utility.RandomString;
 import net.javacrumbs.jsonunit.JsonAssert;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -21,6 +25,7 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
@@ -285,6 +290,56 @@ class CategoryControllerTest extends AbstractErrorControllerTest {
         verify(model, times(1)).hasError();
         verify(model, times(1)).getError();
         verify(service, times(1)).saveCategory(category);
+    }
+
+    @Test
+    void whenCategoryName_isEmpty_thenReturnError() throws Exception {
+        UpsertCategoryRequest request = createUpsertCategoryRequest(null);
+
+        MockHttpServletResponse response = mockMvc.perform(
+                        post(getUrl())
+                                .contentType(APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andReturn()
+                .getResponse();
+
+        response.setCharacterEncoding("UTF-8");
+
+        String actual = response.getContentAsString();
+
+        String expected = StringTestUtils.readStringFromResources("/responses/v1/errors/create_empty_category_error_response.json");
+
+        JsonAssert.assertJsonEquals(expected, actual);
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidSizeCategoryName")
+    void whenCategoryName_isLessThen5_OrMoreThen50_thenReturnError(String name) throws Exception {
+        UpsertCategoryRequest request = createUpsertCategoryRequest(name);
+
+        MockHttpServletResponse response = mockMvc.perform(
+                        post(getUrl())
+                                .contentType(APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andReturn()
+                .getResponse();
+
+        response.setCharacterEncoding("UTF-8");
+
+        String actual = response.getContentAsString();
+
+        String expected = StringTestUtils.readStringFromResources("/responses/v1/errors/create_not_less_or_more_then_posible_category_name_error_response.json");
+
+        JsonAssert.assertJsonEquals(expected, actual);
+    }
+
+    public static Stream<Arguments> invalidSizeCategoryName() {
+        return Stream.of(
+                Arguments.arguments(RandomString.make(4)),
+                Arguments.arguments(RandomString.make(51))
+        );
     }
 
     private CategoryError createCategoryCategoryExist(String name) {
