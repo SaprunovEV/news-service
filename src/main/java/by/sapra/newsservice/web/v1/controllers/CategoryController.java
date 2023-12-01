@@ -5,6 +5,7 @@ import by.sapra.newsservice.services.CategoryService;
 import by.sapra.newsservice.services.models.ApplicationModel;
 import by.sapra.newsservice.services.models.CategoryFilter;
 import by.sapra.newsservice.web.v1.mappers.CategoryMapper;
+import by.sapra.newsservice.web.v1.models.CategoryId;
 import by.sapra.newsservice.web.v1.models.CategoryListResponse;
 import by.sapra.newsservice.web.v1.models.CategoryResponse;
 import by.sapra.newsservice.web.v1.models.PaginationErrorResponse;
@@ -20,7 +21,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -82,8 +82,8 @@ public class CategoryController {
                     schema = @Schema(implementation = CategoryNotFound.class),
                     examples = {@ExampleObject(value = "{\n\"message\": \"Категория по ID 3 не найдена!\"\n}")})
     )
-    public ResponseEntity<?> handleFindById(@PathVariable(name = "id") Long id) {
-        ApplicationModel<CategoryWithNews, CategoryNotFound> model = service.findById(id);
+    public ResponseEntity<?> handleFindById(@Valid CategoryId id) {
+        ApplicationModel<CategoryWithNews, CategoryNotFound> model = service.findById(id.getId());
 
         if (model.hasError()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(model.getError());
