@@ -4,6 +4,7 @@ import by.sapra.newsservice.models.errors.CategoryError;
 import by.sapra.newsservice.services.CategoryService;
 import by.sapra.newsservice.services.models.ApplicationModel;
 import by.sapra.newsservice.services.models.CategoryFilter;
+import by.sapra.newsservice.web.v1.annotations.CreateNewCategoryDock;
 import by.sapra.newsservice.web.v1.mappers.CategoryMapper;
 import by.sapra.newsservice.web.v1.models.*;
 import io.swagger.v3.oas.annotations.Operation;
@@ -96,30 +97,7 @@ public class CategoryController {
     }
 
     @PostMapping
-    @Operation(
-            summary = "Saved new category.",
-            description = "Saved new category. Return saved category.",
-            method = "POST",
-            tags = {"category", "V1"}
-    )
-    @ApiResponse(
-            responseCode = "200",
-            content = @Content(schema = @Schema(implementation = CategoryResponse.class))
-    )
-    @ApiResponse(
-            responseCode = "400",
-            description = "Category already exist.",
-            content = @Content(
-                    schema = @Schema(implementation = CategoryError.class),
-                    examples = {@ExampleObject(value = "{\n\"message\": \"Категория с именем бизнес уже существует!\"\n}")})
-    )
-    @ApiResponse(
-            responseCode = "406",
-            description = "Category validation error.",
-            content = @Content(
-                    schema = @Schema(implementation = CategoryError.class),
-                    examples = {@ExampleObject(value = "{\n\"message\": \"Имя категории должно быть между 5 и 50 символами\"\n}")})
-    )
+    @CreateNewCategoryDock
     public ResponseEntity<?> handleSaveCategory(@RequestBody @Valid UpsertCategoryRequest request) {
         ApplicationModel<CategoryWithNews, CategoryError> model =
                 service.saveCategory(mapper.requestToCategoryWithNews(request));
