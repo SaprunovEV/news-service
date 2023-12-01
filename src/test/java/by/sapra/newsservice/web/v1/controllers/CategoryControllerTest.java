@@ -179,6 +179,40 @@ class CategoryControllerTest extends AbstractErrorControllerTest {
         verify(service, times(1)).findById(id);
     }
 
+    @Test
+    void whenIdIsNegative_shouldReturnError() throws Exception {
+        long id = -1;
+
+        MockHttpServletResponse response = mockMvc.perform(get(getUrl() + "/{id}", id))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse();
+
+        response.setCharacterEncoding("UTF-8");
+
+        String actual = response.getContentAsString();
+
+        String expected = StringTestUtils.readStringFromResources("/responses/v1/errors/negative_id_error_response.json");
+
+        JsonAssert.assertJsonEquals(expected, actual);
+    }
+
+    @Test
+    void whenIdIsZero_shouldReturnError() throws Exception {
+        long id = 0;
+
+        MockHttpServletResponse response = mockMvc.perform(get(getUrl() + "/{id}", id))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse();
+
+        response.setCharacterEncoding("UTF-8");
+
+        String actual = response.getContentAsString();
+
+        String expected = StringTestUtils.readStringFromResources("/responses/v1/errors/negative_id_error_response.json");
+
+        JsonAssert.assertJsonEquals(expected, actual);
+    }
+
     private CategoryNotFound createCategoryNotFoundError(long id) {
         return CategoryNotFound.builder()
                 .message(MessageFormat.format("Категория с {0} не найдена!", id))
