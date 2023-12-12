@@ -155,12 +155,20 @@ class CategoryServiceTest  {
         when(mapper.categoryWithNewsToFullCategoryModel(input))
                 .thenReturn(categoryToSave);
 
+        FullCategoryModel savedCategory = FullCategoryModel.builder()
+                .name(expected)
+                .id(1L)
+                .news(new ArrayList<>())
+                .build();
         when(storage.createCategory(categoryToSave))
-                .thenReturn(Optional.of(FullCategoryModel.builder()
+                .thenReturn(Optional.of(savedCategory));
+
+        when(mapper.fullCategoryToCategoryWithNews(savedCategory))
+                .thenReturn(CategoryWithNews.builder()
                         .name(expected)
-                        .id(1L)
                         .news(new ArrayList<>())
-                        .build()));
+                        .id(1L)
+                        .build());
 
         ApplicationModel<CategoryWithNews, CategoryError> result = service.saveCategory(input);
 
@@ -168,6 +176,10 @@ class CategoryServiceTest  {
             assertFalse(result.hasError());
             assertEquals(expected, result.getData().getName());
         });
+
+        verify(mapper, times(1)).categoryWithNewsToFullCategoryModel(input);
+        verify(storage, times(1)).createCategory(categoryToSave);
+        verify(mapper, times(1)).fullCategoryToCategoryWithNews(savedCategory);
     }
 
     @NotNull

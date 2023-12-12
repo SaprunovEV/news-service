@@ -51,10 +51,12 @@ public class DatabaseCategoryService implements CategoryService {
 
     @Override
     public  ApplicationModel<CategoryWithNews, CategoryError>  saveCategory(CategoryWithNews category) {
+        Optional<FullCategoryModel> optional =
+                storage.createCategory(mapper.categoryWithNewsToFullCategoryModel(category));
         return new ApplicationModel<>() {
             @Override
             public CategoryWithNews getData() {
-                return null;
+                return mapper.fullCategoryToCategoryWithNews(optional.get());
             }
 
             @Override
@@ -64,7 +66,7 @@ public class DatabaseCategoryService implements CategoryService {
 
             @Override
             public boolean hasError() {
-                return false;
+                return optional.isEmpty();
             }
         };
     }
