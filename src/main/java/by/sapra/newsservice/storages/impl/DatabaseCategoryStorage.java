@@ -38,6 +38,7 @@ public class DatabaseCategoryStorage implements CategoryStorage {
 
     @Override
     public Optional<FullCategoryModel> createCategory(FullCategoryModel categoryToSave) {
+
         return Optional.empty();
     }
 

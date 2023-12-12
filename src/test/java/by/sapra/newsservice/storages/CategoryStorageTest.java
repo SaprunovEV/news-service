@@ -3,6 +3,7 @@ package by.sapra.newsservice.storages;
 import by.sapra.newsservice.config.AbstractDataTest;
 import by.sapra.newsservice.models.CategoryEntity;
 import by.sapra.newsservice.services.models.CategoryFilter;
+import by.sapra.newsservice.storages.mappers.MapperConf;
 import by.sapra.newsservice.storages.mappers.StorageCategoryMapper;
 import by.sapra.newsservice.storages.models.CategoryListModel;
 import by.sapra.newsservice.storages.models.CategoryModel;
@@ -10,6 +11,7 @@ import by.sapra.newsservice.storages.models.FullCategoryModel;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.ContextHierarchy;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -19,9 +21,11 @@ import java.util.stream.Collectors;
 
 import static by.sapra.newsservice.testUtils.CategoryTestDataBuilder.aCategory;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.Mockito.*;
 
-@ContextConfiguration(classes = CategoryStorageConf.class)
+@ContextHierarchy({
+        @ContextConfiguration(classes = MapperConf.class),
+        @ContextConfiguration(classes = CategoryStorageConf.class)
+})
 class CategoryStorageTest extends AbstractDataTest {
     @Autowired
     private CategoryStorage storage;
@@ -70,15 +74,10 @@ class CategoryStorageTest extends AbstractDataTest {
                 .count(3)
                 .categories(createListCategoryModel(entities, countMap))
                 .build();
-        when(mapper.entityListToCategoryListModel(entities, countMap)).thenReturn(
-                expected
-        );
 
         CategoryListModel actual = storage.findAll(filter);
 
         assertEquals(expected, actual);
-
-        verify(mapper, times(1)).entityListToCategoryListModel(eq(entities), eq(countMap));
     }
 
     @Test
@@ -98,11 +97,6 @@ class CategoryStorageTest extends AbstractDataTest {
         getTestDbFacade().save(aCategory().withName("test 3"));
         getTestDbFacade().save(aCategory().withName("test 4"));
 
-        when(mapper.entityToFullCategory(expected)).thenReturn(FullCategoryModel.builder()
-                        .name(expected.getName())
-                        .id(expected.getId())
-                .build());
-
         Optional<FullCategoryModel> actual = storage.findById(expected.getId());
 
         assertAll(() -> {
@@ -111,8 +105,23 @@ class CategoryStorageTest extends AbstractDataTest {
             assertEquals(category.getId(), actual.get().getId());
             assertEquals(category.getName(), actual.get().getName());
         });
+    }
 
-        verify(mapper, times(1)).entityToFullCategory(expected);
+    @Test
+    void shouldReturnNotEmptyOptional_whenCategoryIsCaved() throws Exception {
+
+        String expected = "testName";
+
+        FullCategoryModel categoryToSave = FullCategoryModel.builder().name(expected).build();
+
+        Optional<FullCategoryModel> actual = storage.createCategory(categoryToSave);
+
+        assertAll(() -> {
+            assertTrue(actual.isPresent(), "неправильный ответ");
+            assertEquals(expected, actual.get().getName());
+            assertEquals(expected, getTestDbFacade().find(actual.get().getId(), CategoryEntity.class).getName(), "не сохранило");
+        });
+
     }
 
     private List<CategoryModel> createListCategoryModel(List<CategoryEntity> expected, Map<Long, Long> countMap) {
