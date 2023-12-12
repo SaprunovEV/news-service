@@ -51,6 +51,21 @@ public class DatabaseCategoryService implements CategoryService {
 
     @Override
     public  ApplicationModel<CategoryWithNews, CategoryError>  saveCategory(CategoryWithNews category) {
-        return null;
+        return new ApplicationModel<>() {
+            @Override
+            public CategoryWithNews getData() {
+                return null;
+            }
+
+            @Override
+            public CategoryError getError() {
+                return null;
+            }
+
+            @Override
+            public boolean hasError() {
+                return false;
+            }
+        };
     }
 }

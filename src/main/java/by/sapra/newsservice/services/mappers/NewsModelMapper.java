@@ -19,4 +19,6 @@ public interface NewsModelMapper {
     @Mapping(source = "commentSize", target = "commentsCount")
     News newsModelToNews(NewsModel newsModel);
 
+    @Mapping(source = "commentsCount", target = "commentSize")
+    NewsModel newsToNewsModel(News news);
 }
