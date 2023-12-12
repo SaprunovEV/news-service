@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.*;
 
@@ -37,7 +38,9 @@ public class DatabaseCategoryStorage implements CategoryStorage {
     }
 
     @Override
+    @Transactional
     public Optional<FullCategoryModel> createCategory(FullCategoryModel categoryToSave) {
+        if (repository.findByName(categoryToSave.getName().toLowerCase()).isPresent()) return Optional.empty();
         CategoryEntity savedCategory = repository.save(mapper.fullCategoryModelToEntity(categoryToSave));
         return Optional.ofNullable(mapper.entityToFullCategory(savedCategory));
     }

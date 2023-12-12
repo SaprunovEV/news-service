@@ -123,6 +123,19 @@ class CategoryStorageTest extends AbstractDataTest {
         });
     }
 
+    @Test
+    void shouldDoSomething() throws Exception {
+        String expected = "testName";
+
+        getTestDbFacade().save(aCategory().withName(expected));
+
+        FullCategoryModel categoryToSave = FullCategoryModel.builder().name(expected).news(new ArrayList<>()).build();
+
+        Optional<FullCategoryModel> actual = storage.createCategory(categoryToSave);
+
+        assertTrue(actual.isEmpty());
+    }
+
     private List<CategoryModel> createListCategoryModel(List<CategoryEntity> expected, Map<Long, Long> countMap) {
         ArrayList<CategoryModel> list = new ArrayList<>();
         for (CategoryEntity categoryEntity : expected) {
