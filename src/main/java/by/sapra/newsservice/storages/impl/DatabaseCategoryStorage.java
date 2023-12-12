@@ -38,8 +38,8 @@ public class DatabaseCategoryStorage implements CategoryStorage {
 
     @Override
     public Optional<FullCategoryModel> createCategory(FullCategoryModel categoryToSave) {
-
-        return Optional.empty();
+        CategoryEntity savedCategory = repository.save(mapper.fullCategoryModelToEntity(categoryToSave));
+        return Optional.ofNullable(mapper.entityToFullCategory(savedCategory));
     }
 
     private CategoryListModel mapListModel(Page<CategoryEntity> page) {

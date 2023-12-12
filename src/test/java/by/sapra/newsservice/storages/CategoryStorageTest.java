@@ -112,16 +112,15 @@ class CategoryStorageTest extends AbstractDataTest {
 
         String expected = "testName";
 
-        FullCategoryModel categoryToSave = FullCategoryModel.builder().name(expected).build();
+        FullCategoryModel categoryToSave = FullCategoryModel.builder().name(expected).news(new ArrayList<>()).build();
 
         Optional<FullCategoryModel> actual = storage.createCategory(categoryToSave);
 
         assertAll(() -> {
             assertTrue(actual.isPresent(), "неправильный ответ");
-            assertEquals(expected, actual.get().getName());
-            assertEquals(expected, getTestDbFacade().find(actual.get().getId(), CategoryEntity.class).getName(), "не сохранило");
+            assertEquals(expected.toLowerCase(), actual.get().getName());
+            assertEquals(expected.toLowerCase(), getTestDbFacade().find(actual.get().getId(), CategoryEntity.class).getName(), "не сохранило");
         });
-
     }
 
     private List<CategoryModel> createListCategoryModel(List<CategoryEntity> expected, Map<Long, Long> countMap) {
