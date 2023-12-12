@@ -1,15 +1,15 @@
 package by.sapra.newsservice.services;
 
-import by.sapra.newsservice.models.errors.CategoryNotFound;
+import by.sapra.newsservice.models.errors.CategoryError;
 import by.sapra.newsservice.services.mappers.CategoryModelMapper;
 import by.sapra.newsservice.services.models.ApplicationModel;
 import by.sapra.newsservice.services.models.Category;
 import by.sapra.newsservice.services.models.CategoryFilter;
+import by.sapra.newsservice.services.models.CategoryWithNews;
 import by.sapra.newsservice.storages.CategoryStorage;
 import by.sapra.newsservice.storages.models.CategoryListModel;
 import by.sapra.newsservice.storages.models.CategoryModel;
 import by.sapra.newsservice.storages.models.FullCategoryModel;
-import by.sapra.newsservice.web.v1.controllers.CategoryWithNews;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -105,7 +105,7 @@ class CategoryServiceTest  {
                 .name("test name")
                 .build());
 
-        ApplicationModel<CategoryWithNews, CategoryNotFound> actual = service.findById(id);
+        ApplicationModel<CategoryWithNews, CategoryError> actual = service.findById(id);
 
         assertAll(() -> {
             assertFalse(actual.hasError());
@@ -121,7 +121,7 @@ class CategoryServiceTest  {
         long id = 1L;
         when(storage.findById(id)).thenReturn(Optional.empty());
 
-        ApplicationModel<CategoryWithNews, CategoryNotFound> actual = service.findById(id);
+        ApplicationModel<CategoryWithNews, CategoryError> actual = service.findById(id);
 
         assertAll(() -> {
             assertNotNull(actual);
@@ -130,6 +130,83 @@ class CategoryServiceTest  {
         });
 
         verify(storage, times(1)).findById(id);
+    }
+
+
+    @Test
+    void shouldNotReturnNull_whenCallSavedMethod() throws Exception {
+        CategoryWithNews expected = CategoryWithNews.builder().build();
+
+        ApplicationModel<CategoryWithNews, CategoryError> actual = service.saveCategory(expected);
+
+        assertNotNull(actual);
+    }
+
+    @Test
+    void shouldReturnDataWithoutError_whenResponseIsCorrect() throws Exception {
+        String expected = "testCategoryName";
+
+        CategoryWithNews input = CategoryWithNews.builder().name(expected).build();
+
+        FullCategoryModel categoryToSave = FullCategoryModel.builder()
+                .name(expected)
+                .build();
+
+        when(mapper.categoryWithNewsToFullCategoryModel(input))
+                .thenReturn(categoryToSave);
+
+        FullCategoryModel savedCategory = FullCategoryModel.builder()
+                .name(expected)
+                .id(1L)
+                .news(new ArrayList<>())
+                .build();
+        when(storage.createCategory(categoryToSave))
+                .thenReturn(Optional.of(savedCategory));
+
+        when(mapper.fullCategoryToCategoryWithNews(savedCategory))
+                .thenReturn(CategoryWithNews.builder()
+                        .name(expected)
+                        .news(new ArrayList<>())
+                        .id(1L)
+                        .build());
+
+        ApplicationModel<CategoryWithNews, CategoryError> result = service.saveCategory(input);
+
+        assertAll(() -> {
+            assertFalse(result.hasError());
+            assertEquals(expected, result.getData().getName());
+        });
+
+        verify(mapper, times(1)).categoryWithNewsToFullCategoryModel(input);
+        verify(storage, times(1)).createCategory(categoryToSave);
+        verify(mapper, times(1)).fullCategoryToCategoryWithNews(savedCategory);
+    }
+
+    @Test
+    void shouldReturnError_whenStorageReturnEmptyOptional() throws Exception {
+        String expected = "testCategory";
+        CategoryWithNews input = CategoryWithNews.builder().name(expected).build();
+
+        FullCategoryModel categoryToSave = FullCategoryModel.builder()
+                .name(expected)
+                .build();
+
+        when(mapper.categoryWithNewsToFullCategoryModel(input))
+                .thenReturn(categoryToSave);
+
+        when(storage.createCategory(categoryToSave))
+                .thenReturn(Optional.empty());
+
+        ApplicationModel<CategoryWithNews, CategoryError> actual = service.saveCategory(input);
+
+        assertAll(() -> {
+            assertNotNull(actual);
+            assertTrue(actual.hasError());
+            assertNotNull(actual.getError());
+        });
+
+        verify(mapper, times(1)).categoryWithNewsToFullCategoryModel(input);
+        verify(storage, times(1)).createCategory(categoryToSave);
     }
 
     @NotNull

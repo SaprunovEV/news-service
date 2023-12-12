@@ -1,9 +1,9 @@
-package by.sapra.newsservice.web.v1.controllers;
+package by.sapra.newsservice.services.models;
 
-import by.sapra.newsservice.services.models.News;
 import lombok.Builder;
 import lombok.Data;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Data
@@ -11,5 +11,6 @@ import java.util.List;
 public class CategoryWithNews {
     private long id;
     private String name;
-    private List<News> news;
+    @Builder.Default
+    private List<News> news = new ArrayList<>();
 }

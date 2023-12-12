@@ -66,6 +66,25 @@ class StorageCategoryMapperTest {
         verify(category2NewsMapper, times(1)).linksToNewsModelList(any());
     }
 
+    @Test
+    void shouldDoSomething() throws Exception {
+        String name = "testCategoryName";
+        FullCategoryModel expected = FullCategoryModel.builder()
+                .news(new ArrayList<>())
+                .name(name)
+                .id(1L)
+                .build();
+
+        CategoryEntity actual = mapper.fullCategoryModelToEntity(expected);
+
+        assertAll(() -> {
+            assertNotNull(actual);
+            assertEquals(expected.getId(), actual.getId());
+            assertEquals(expected.getName().toLowerCase(), actual.getName());
+            assertNotNull(actual.getCategory2News());
+        });
+    }
+
     private void assertFullCategory(CategoryEntity expected, FullCategoryModel actual) {
         assertAll(() -> {
             assertNotNull(actual);

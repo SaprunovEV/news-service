@@ -1,10 +1,11 @@
 package by.sapra.newsservice.web.v1.mappers;
 
 import by.sapra.newsservice.services.models.Category;
-import by.sapra.newsservice.web.v1.controllers.CategoryWithNews;
+import by.sapra.newsservice.services.models.CategoryWithNews;
 import by.sapra.newsservice.web.v1.models.CategoryItem;
 import by.sapra.newsservice.web.v1.models.CategoryListResponse;
 import by.sapra.newsservice.web.v1.models.CategoryResponse;
+import by.sapra.newsservice.web.v1.models.UpsertCategoryRequest;
 import org.mapstruct.Mapper;
 
 import java.util.List;
@@ -22,4 +23,6 @@ public interface CategoryMapper {
     CategoryItem categoryToCategoryItem(Category category);
 
     CategoryResponse categoryToCategoryResponse(CategoryWithNews category);
+
+    CategoryWithNews requestToCategoryWithNews(UpsertCategoryRequest request);
 }

@@ -4,7 +4,7 @@ import by.sapra.newsservice.services.models.Category;
 import by.sapra.newsservice.storages.models.CategoryListModel;
 import by.sapra.newsservice.storages.models.CategoryModel;
 import by.sapra.newsservice.storages.models.FullCategoryModel;
-import by.sapra.newsservice.web.v1.controllers.CategoryWithNews;
+import by.sapra.newsservice.services.models.CategoryWithNews;
 import org.mapstruct.Mapper;
 
 import java.util.List;
@@ -20,4 +20,6 @@ public interface CategoryModelMapper {
     Category categoryModelToCategory(CategoryModel categoryModel);
 
     CategoryWithNews fullCategoryToCategoryWithNews(FullCategoryModel fullCategoryModel);
+
+    FullCategoryModel categoryWithNewsToFullCategoryModel(CategoryWithNews input);
 }

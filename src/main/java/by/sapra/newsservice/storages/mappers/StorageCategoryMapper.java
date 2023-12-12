@@ -24,4 +24,7 @@ public interface StorageCategoryMapper {
     CategoryModel entityToCategoryModel(CategoryEntity categoryEntity, long count);
     @Mapping(source = "category2News", target = "news")
     FullCategoryModel entityToFullCategory(CategoryEntity expected);
+
+    @Mapping(target = "category2News", source = "news")
+    CategoryEntity fullCategoryModelToEntity(FullCategoryModel categoryToSave);
 }

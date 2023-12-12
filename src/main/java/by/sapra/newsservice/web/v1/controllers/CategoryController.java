@@ -1,14 +1,13 @@
 package by.sapra.newsservice.web.v1.controllers;
 
-import by.sapra.newsservice.models.errors.CategoryNotFound;
+import by.sapra.newsservice.models.errors.CategoryError;
 import by.sapra.newsservice.services.CategoryService;
 import by.sapra.newsservice.services.models.ApplicationModel;
 import by.sapra.newsservice.services.models.CategoryFilter;
+import by.sapra.newsservice.services.models.CategoryWithNews;
+import by.sapra.newsservice.web.v1.annotations.CreateNewCategoryDock;
 import by.sapra.newsservice.web.v1.mappers.CategoryMapper;
-import by.sapra.newsservice.web.v1.models.CategoryId;
-import by.sapra.newsservice.web.v1.models.CategoryListResponse;
-import by.sapra.newsservice.web.v1.models.CategoryResponse;
-import by.sapra.newsservice.web.v1.models.PaginationErrorResponse;
+import by.sapra.newsservice.web.v1.models.*;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.media.Content;
@@ -20,9 +19,9 @@ import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import static org.springframework.http.HttpStatus.CREATED;
 
 @RestController
 @RequestMapping("/api/v1/categories")
@@ -79,22 +78,34 @@ public class CategoryController {
             responseCode = "404",
             description = "Category id not found.",
             content = @Content(
-                    schema = @Schema(implementation = CategoryNotFound.class),
+                    schema = @Schema(implementation = CategoryError.class),
                     examples = {@ExampleObject(value = "{\n\"message\": \"Категория по ID 3 не найдена!\"\n}")})
     )
     @ApiResponse(
             responseCode = "400",
             description = "Category id should positive.",
             content = @Content(
-                    schema = @Schema(implementation = CategoryNotFound.class),
+                    schema = @Schema(implementation = CategoryError.class),
                     examples = {@ExampleObject(value = "{\n\"message\": \"Параметр ID должен быть положителен!\"\n}")})
     )
     public ResponseEntity<?> handleFindById(@Valid CategoryId id) {
-        ApplicationModel<CategoryWithNews, CategoryNotFound> model = service.findById(id.getId());
+        ApplicationModel<CategoryWithNews, CategoryError> model = service.findById(id.getId());
 
         if (model.hasError()) {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).body(model.getError());
         }
         return ResponseEntity.ok(mapper.categoryToCategoryResponse(model.getData()));
+    }
+
+    @PostMapping
+    @CreateNewCategoryDock
+    public ResponseEntity<?> handleSaveCategory(@RequestBody @Valid UpsertCategoryRequest request) {
+        ApplicationModel<CategoryWithNews, CategoryError> model =
+                service.saveCategory(mapper.requestToCategoryWithNews(request));
+
+        if (model.hasError())
+            return ResponseEntity.badRequest().body(model.getError());
+
+        return ResponseEntity.status(CREATED).body(mapper.categoryToCategoryResponse(model.getData()));
     }
 }

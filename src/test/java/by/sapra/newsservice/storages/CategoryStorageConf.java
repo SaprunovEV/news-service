@@ -10,11 +10,6 @@ import org.springframework.context.annotation.Bean;
 
 @TestConfiguration
 public class CategoryStorageConf {
-
-    @Bean
-    public StorageCategoryMapper mapper() {
-        return Mockito.mock(StorageCategoryMapper.class);
-    }
     @Bean
     public CategoryStorage categoryStorage(CategoryRepository catRepo, Category2NewsRepository ct2newRepo, StorageCategoryMapper mapper) {
         return new DatabaseCategoryStorage(catRepo, ct2newRepo, mapper);

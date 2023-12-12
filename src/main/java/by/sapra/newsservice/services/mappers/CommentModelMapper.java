@@ -14,4 +14,6 @@ public interface CommentModelMapper {
     default List<Comment> commentListModelToCommentList(CommentListModel model) {
         return null;
     }
+
+    default CommentListModel listCommentsToCommentListModel(List<Comment> comments) {return null;}
 }

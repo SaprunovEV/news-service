@@ -10,4 +10,6 @@ public interface CategoryStorage {
     CategoryListModel findAll(CategoryFilter filter);
 
     Optional<FullCategoryModel> findById(long id);
+
+    Optional<FullCategoryModel> createCategory(FullCategoryModel categoryToSave);
 }

@@ -4,7 +4,7 @@ import by.sapra.newsservice.storages.models.CategoryListModel;
 import by.sapra.newsservice.storages.models.CategoryModel;
 import by.sapra.newsservice.storages.models.FullCategoryModel;
 import by.sapra.newsservice.storages.models.NewsModel;
-import by.sapra.newsservice.web.v1.controllers.CategoryWithNews;
+import by.sapra.newsservice.services.models.CategoryWithNews;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -60,6 +60,25 @@ class CategoryModelMapperTest {
             assertEquals(3, actual.getNews().size());
             assertEquals(name, actual.getName());
             assertEquals(id, actual.getId());
+        });
+    }
+
+    @Test
+    void shouldMapCategoryWithNewsToFullCategoryModel() throws Exception {
+        String expectedName = "testCategoryName";
+        CategoryWithNews expected = CategoryWithNews.builder()
+                .id(1L)
+                .news(new ArrayList<>())
+                .name(expectedName)
+                .build();
+
+        FullCategoryModel actual = mapper.categoryWithNewsToFullCategoryModel(expected);
+
+        assertAll(() -> {
+            assertNotNull(actual);
+            assertNotNull(actual.getNews());
+            assertEquals(expected.getId(), actual.getId());
+            assertEquals(expected.getName(), actual.getName());
         });
     }
 

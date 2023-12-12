@@ -1,6 +1,6 @@
 package by.sapra.newsservice.services.impl;
 
-import by.sapra.newsservice.models.errors.CategoryNotFound;
+import by.sapra.newsservice.models.errors.CategoryError;
 import by.sapra.newsservice.services.CategoryService;
 import by.sapra.newsservice.services.mappers.CategoryModelMapper;
 import by.sapra.newsservice.services.models.ApplicationModel;
@@ -8,7 +8,7 @@ import by.sapra.newsservice.services.models.Category;
 import by.sapra.newsservice.services.models.CategoryFilter;
 import by.sapra.newsservice.storages.CategoryStorage;
 import by.sapra.newsservice.storages.models.FullCategoryModel;
-import by.sapra.newsservice.web.v1.controllers.CategoryWithNews;
+import by.sapra.newsservice.services.models.CategoryWithNews;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -27,18 +27,29 @@ public class DatabaseCategoryService implements CategoryService {
     }
 
     @Override
-    public ApplicationModel<CategoryWithNews, CategoryNotFound> findById(long id) {
+    public ApplicationModel<CategoryWithNews, CategoryError> findById(long id) {
         Optional<FullCategoryModel> optional = storage.findById(id);
+        return createResult(optional, MessageFormat.format("Категория с ID {0} не найдена!", id));
+    }
+
+    @Override
+    public  ApplicationModel<CategoryWithNews, CategoryError>  saveCategory(CategoryWithNews category) {
+        Optional<FullCategoryModel> optional =
+                storage.createCategory(mapper.categoryWithNewsToFullCategoryModel(category));
+        return createResult(optional, MessageFormat.format("Категория с именем {0} уже существует!", category.getName()));
+    }
+
+    private ApplicationModel<CategoryWithNews, CategoryError> createResult(Optional<FullCategoryModel> optional, String category) {
         return new ApplicationModel<>() {
             @Override
             public CategoryWithNews getData() {
-                return mapper.fullCategoryToCategoryWithNews(optional.get());
+                return mapper.fullCategoryToCategoryWithNews(optional.orElseGet(() -> FullCategoryModel.builder().build()));
             }
 
             @Override
-            public CategoryNotFound getError() {
-                return CategoryNotFound.builder()
-                        .message(MessageFormat.format("Категория с ID {0} не найдена!", id))
+            public CategoryError getError() {
+                return CategoryError.builder()
+                        .message(category)
                         .build();
             }
 

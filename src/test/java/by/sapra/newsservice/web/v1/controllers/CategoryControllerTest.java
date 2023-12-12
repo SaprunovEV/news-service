@@ -1,18 +1,19 @@
 package by.sapra.newsservice.web.v1.controllers;
 
-import by.sapra.newsservice.models.errors.CategoryNotFound;
+import by.sapra.newsservice.models.errors.CategoryError;
 import by.sapra.newsservice.services.CategoryService;
-import by.sapra.newsservice.services.models.ApplicationModel;
-import by.sapra.newsservice.services.models.Category;
-import by.sapra.newsservice.services.models.CategoryFilter;
-import by.sapra.newsservice.services.models.News;
+import by.sapra.newsservice.services.models.*;
 import by.sapra.newsservice.testUtils.StringTestUtils;
 import by.sapra.newsservice.web.v1.AbstractErrorControllerTest;
 import by.sapra.newsservice.web.v1.mappers.CategoryMapper;
 import by.sapra.newsservice.web.v1.models.*;
+import net.bytebuddy.utility.RandomString;
 import net.javacrumbs.jsonunit.JsonAssert;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mock.web.MockHttpServletResponse;
@@ -21,9 +22,12 @@ import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilde
 import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.mockito.Mockito.*;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = CategoryController.class)
@@ -133,7 +137,7 @@ class CategoryControllerTest extends AbstractErrorControllerTest {
         long id = 2;
 
         CategoryWithNews category = createCategoryWithNews(id, 3);
-        ApplicationModel<CategoryWithNews, CategoryNotFound> model = mock(ApplicationModel.class);
+        ApplicationModel<CategoryWithNews, CategoryError> model = mock(ApplicationModel.class);
         when(service.findById(id)).thenReturn(model);
         when(model.hasError()).thenReturn(false);
         when(model.getData()).thenReturn(category);
@@ -157,11 +161,11 @@ class CategoryControllerTest extends AbstractErrorControllerTest {
         long id = 2;
 
         CategoryWithNews category = createCategoryWithNews(id, 3);
-        ApplicationModel<CategoryWithNews, CategoryNotFound> model = mock(ApplicationModel.class);
+        ApplicationModel<CategoryWithNews, CategoryError> model = mock(ApplicationModel.class);
         when(service.findById(id)).thenReturn(model);
         when(model.hasError()).thenReturn(true);
-        CategoryNotFound categoryNotFoundError = createCategoryNotFoundError(id);
-        when(model.getError()).thenReturn(categoryNotFoundError);
+        CategoryError categoryErrorError = createCategoryNotFoundError(id);
+        when(model.getError()).thenReturn(categoryErrorError);
 
         MockHttpServletResponse response = mockMvc.perform(get(getUrl() + "/{id}", id))
                 .andExpect(status().isNotFound())
@@ -213,8 +217,140 @@ class CategoryControllerTest extends AbstractErrorControllerTest {
         JsonAssert.assertJsonEquals(expected, actual);
     }
 
-    private CategoryNotFound createCategoryNotFoundError(long id) {
-        return CategoryNotFound.builder()
+    @Test
+    void whenCreateTheCategory_ThenReturnSavedCategory() throws Exception {
+        String name = "Test category 1";
+        UpsertCategoryRequest request = createUpsertCategoryRequest(name);
+
+        CategoryWithNews category = createCategoryWithNews(0L, 0);
+        when(mapper.requestToCategoryWithNews(request)).thenReturn(category);
+        CategoryWithNews savedCategory = createCategoryWithNews(1L, 0);
+        ApplicationModel<CategoryWithNews, CategoryError> model = mock(ApplicationModel.class);
+        when(service.saveCategory(category)).thenReturn(model);
+        when(model.hasError()).thenReturn(false);
+        when(model.getData()).thenReturn(savedCategory);
+        when(mapper.categoryToCategoryResponse(savedCategory))
+                .thenReturn(createCategoryResponseWithNews(1L, 0));
+
+        String actual = mockMvc.perform(
+                        post(getUrl())
+                                .contentType(APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andReturn()
+                .getResponse()
+                .getContentAsString();
+
+        String expected = StringTestUtils.readStringFromResources("/responses/v1/categories/save_new_category_request.json");
+
+        JsonAssert.assertJsonEquals(expected, actual);
+
+        verify(mapper, times(1)).requestToCategoryWithNews(request);
+        verify(service, times(1)).saveCategory(category);
+        verify(model, times(1)).hasError();
+        verify(model, times(1)).getData();
+        verify(mapper, times(1)).categoryToCategoryResponse(savedCategory);
+    }
+
+    @Test
+    void whenSavedExistingCategory_thenReturnError() throws Exception {
+        String name = "Test category 1";
+
+        UpsertCategoryRequest request = createUpsertCategoryRequest(name);
+
+        CategoryWithNews category = createCategoryWithNews(0L, 0);
+        when(mapper.requestToCategoryWithNews(request)).thenReturn(category);
+        ApplicationModel<CategoryWithNews, CategoryError> model = mock(ApplicationModel.class);
+        when(service.saveCategory(category)).thenReturn(model);
+        when(model.hasError()).thenReturn(true);
+        CategoryError categoryExist = createCategoryCategoryExist(name);
+        when(model.getError()).thenReturn(categoryExist);
+        when(model.getError()).thenReturn(categoryExist);
+
+        MockHttpServletResponse response = mockMvc.perform(
+                        post(getUrl())
+                                .contentType(APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andReturn()
+                .getResponse();
+
+        response.setCharacterEncoding("UTF-8");
+
+        String actual = response.getContentAsString();
+
+        String expected = StringTestUtils.readStringFromResources("/responses/v1/errors/save_existing_category_response.json");
+
+        JsonAssert.assertJsonEquals(expected, actual);
+
+        verify(mapper, times(1)).requestToCategoryWithNews(request);
+        verify(model, times(1)).hasError();
+        verify(model, times(1)).getError();
+        verify(service, times(1)).saveCategory(category);
+    }
+
+    @Test
+    void whenCategoryName_isEmpty_thenReturnError() throws Exception {
+        UpsertCategoryRequest request = createUpsertCategoryRequest(null);
+
+        MockHttpServletResponse response = mockMvc.perform(
+                        post(getUrl())
+                                .contentType(APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andReturn()
+                .getResponse();
+
+        response.setCharacterEncoding("UTF-8");
+
+        String actual = response.getContentAsString();
+
+        String expected = StringTestUtils.readStringFromResources("/responses/v1/errors/create_empty_category_error_response.json");
+
+        JsonAssert.assertJsonEquals(expected, actual);
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidSizeCategoryName")
+    void whenCategoryName_isLessThen5_OrMoreThen50_thenReturnError(String name) throws Exception {
+        UpsertCategoryRequest request = createUpsertCategoryRequest(name);
+
+        MockHttpServletResponse response = mockMvc.perform(
+                        post(getUrl())
+                                .contentType(APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andReturn()
+                .getResponse();
+
+        response.setCharacterEncoding("UTF-8");
+
+        String actual = response.getContentAsString();
+
+        String expected = StringTestUtils.readStringFromResources("/responses/v1/errors/create_not_less_or_more_then_posible_category_name_error_response.json");
+
+        JsonAssert.assertJsonEquals(expected, actual);
+    }
+
+    public static Stream<Arguments> invalidSizeCategoryName() {
+        return Stream.of(
+                Arguments.arguments(RandomString.make(4)),
+                Arguments.arguments(RandomString.make(51))
+        );
+    }
+
+    private CategoryError createCategoryCategoryExist(String name) {
+        return CategoryError.builder()
+                .message(MessageFormat.format("Категория с именем {0} уже существует!", name))
+                .build();
+    }
+
+    private UpsertCategoryRequest createUpsertCategoryRequest(String name) {
+        return UpsertCategoryRequest.builder().name(name).build();
+    }
+
+    private CategoryError createCategoryNotFoundError(long id) {
+        return CategoryError.builder()
                 .message(MessageFormat.format("Категория с {0} не найдена!", id))
                 .build();
     }

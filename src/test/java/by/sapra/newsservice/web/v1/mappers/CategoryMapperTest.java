@@ -2,10 +2,11 @@ package by.sapra.newsservice.web.v1.mappers;
 
 import by.sapra.newsservice.services.models.Category;
 import by.sapra.newsservice.services.models.News;
-import by.sapra.newsservice.web.v1.controllers.CategoryWithNews;
+import by.sapra.newsservice.services.models.CategoryWithNews;
 import by.sapra.newsservice.web.v1.models.CategoryItem;
 import by.sapra.newsservice.web.v1.models.CategoryListResponse;
 import by.sapra.newsservice.web.v1.models.CategoryResponse;
+import by.sapra.newsservice.web.v1.models.UpsertCategoryRequest;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -55,6 +56,21 @@ class CategoryMapperTest {
             assertEquals(3, actual.getNews().size());
             assertEquals(name, actual.getName());
             assertEquals(id, actual.getId());
+        });
+    }
+
+    @Test
+    void shouldMapRequestToCategoryWithNews() throws Exception {
+        UpsertCategoryRequest expected = UpsertCategoryRequest.builder()
+                .name("testCategoryName")
+                .build();
+
+        CategoryWithNews actual = mapper.requestToCategoryWithNews(expected);
+
+        assertAll(() -> {
+            assertNotNull(actual);
+            assertNotNull(actual.getNews());
+            assertEquals(expected.getName(), actual.getName());
         });
     }
 
