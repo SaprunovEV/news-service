@@ -5,11 +5,11 @@ import by.sapra.newsservice.services.mappers.CategoryModelMapper;
 import by.sapra.newsservice.services.models.ApplicationModel;
 import by.sapra.newsservice.services.models.Category;
 import by.sapra.newsservice.services.models.CategoryFilter;
+import by.sapra.newsservice.services.models.CategoryWithNews;
 import by.sapra.newsservice.storages.CategoryStorage;
 import by.sapra.newsservice.storages.models.CategoryListModel;
 import by.sapra.newsservice.storages.models.CategoryModel;
 import by.sapra.newsservice.storages.models.FullCategoryModel;
-import by.sapra.newsservice.services.models.CategoryWithNews;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -130,6 +130,44 @@ class CategoryServiceTest  {
         });
 
         verify(storage, times(1)).findById(id);
+    }
+
+
+    @Test
+    void shouldNotReturnNull_whenCallSavedMethod() throws Exception {
+        CategoryWithNews expected = CategoryWithNews.builder().build();
+
+        ApplicationModel<CategoryWithNews, CategoryError> actual = service.saveCategory(expected);
+
+        assertNotNull(actual);
+    }
+
+    @Test
+    void shouldReturnDataWithoutError_whenResponseIsCorrect() throws Exception {
+        String expected = "testCategoryName";
+
+        CategoryWithNews input = CategoryWithNews.builder().name(expected).build();
+
+        FullCategoryModel categoryToSave = FullCategoryModel.builder()
+                .name(expected)
+                .build();
+
+        when(mapper.categoryWithNewsToFullCategoryModel(input))
+                .thenReturn(categoryToSave);
+
+        when(storage.createCategory(categoryToSave))
+                .thenReturn(Optional.of(FullCategoryModel.builder()
+                        .name(expected)
+                        .id(1L)
+                        .news(new ArrayList<>())
+                        .build()));
+
+        ApplicationModel<CategoryWithNews, CategoryError> result = service.saveCategory(input);
+
+        assertAll(() -> {
+            assertFalse(result.hasError());
+            assertEquals(expected, result.getData().getName());
+        });
     }
 
     @NotNull

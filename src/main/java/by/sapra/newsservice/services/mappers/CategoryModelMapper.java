@@ -20,4 +20,6 @@ public interface CategoryModelMapper {
     Category categoryModelToCategory(CategoryModel categoryModel);
 
     CategoryWithNews fullCategoryToCategoryWithNews(FullCategoryModel fullCategoryModel);
+
+    FullCategoryModel categoryWithNewsToFullCategoryModel(CategoryWithNews input);
 }
