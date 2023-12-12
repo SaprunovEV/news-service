@@ -43,7 +43,7 @@ public class DatabaseCategoryService implements CategoryService {
         return new ApplicationModel<>() {
             @Override
             public CategoryWithNews getData() {
-                return mapper.fullCategoryToCategoryWithNews(optional.get());
+                return mapper.fullCategoryToCategoryWithNews(optional.orElseGet(() -> FullCategoryModel.builder().build()));
             }
 
             @Override
