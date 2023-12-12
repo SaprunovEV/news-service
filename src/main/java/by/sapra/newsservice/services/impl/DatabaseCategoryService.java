@@ -61,7 +61,9 @@ public class DatabaseCategoryService implements CategoryService {
 
             @Override
             public CategoryError getError() {
-                return null;
+                return CategoryError.builder()
+                        .message(MessageFormat.format("Категория с именем {0} уже существует!", category.getName()))
+                        .build();
             }
 
             @Override

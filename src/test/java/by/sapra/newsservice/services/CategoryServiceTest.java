@@ -182,6 +182,33 @@ class CategoryServiceTest  {
         verify(mapper, times(1)).fullCategoryToCategoryWithNews(savedCategory);
     }
 
+    @Test
+    void shouldReturnError_whenStorageReturnEmptyOptional() throws Exception {
+        String expected = "testCategory";
+        CategoryWithNews input = CategoryWithNews.builder().name(expected).build();
+
+        FullCategoryModel categoryToSave = FullCategoryModel.builder()
+                .name(expected)
+                .build();
+
+        when(mapper.categoryWithNewsToFullCategoryModel(input))
+                .thenReturn(categoryToSave);
+
+        when(storage.createCategory(categoryToSave))
+                .thenReturn(Optional.empty());
+
+        ApplicationModel<CategoryWithNews, CategoryError> actual = service.saveCategory(input);
+
+        assertAll(() -> {
+            assertNotNull(actual);
+            assertTrue(actual.hasError());
+            assertNotNull(actual.getError());
+        });
+
+        verify(mapper, times(1)).categoryWithNewsToFullCategoryModel(input);
+        verify(storage, times(1)).createCategory(categoryToSave);
+    }
+
     @NotNull
     private static List<Category> createCategoryList(long count) {
         ArrayList<Category> list = new ArrayList<>();
