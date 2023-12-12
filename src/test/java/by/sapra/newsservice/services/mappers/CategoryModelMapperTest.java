@@ -63,6 +63,25 @@ class CategoryModelMapperTest {
         });
     }
 
+    @Test
+    void shouldMapCategoryWithNewsToFullCategoryModel() throws Exception {
+        String expectedName = "testCategoryName";
+        CategoryWithNews expected = CategoryWithNews.builder()
+                .id(1L)
+                .news(new ArrayList<>())
+                .name(expectedName)
+                .build();
+
+        FullCategoryModel actual = mapper.categoryWithNewsToFullCategoryModel(expected);
+
+        assertAll(() -> {
+            assertNotNull(actual);
+            assertNotNull(actual.getNews());
+            assertEquals(expected.getId(), actual.getId());
+            assertEquals(expected.getName(), actual.getName());
+        });
+    }
+
     private FullCategoryModel createCategoryFullModel(long id, String name) {
 
         return FullCategoryModel.builder()
