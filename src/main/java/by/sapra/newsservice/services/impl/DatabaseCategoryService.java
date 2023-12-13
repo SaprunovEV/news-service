@@ -39,6 +39,11 @@ public class DatabaseCategoryService implements CategoryService {
         return createResult(optional, MessageFormat.format("Категория с именем {0} уже существует!", category.getName()));
     }
 
+    @Override
+    public CategoryWithNews updateCategory(CategoryWithNews news2update) {
+        return null;
+    }
+
     private ApplicationModel<CategoryWithNews, CategoryError> createResult(Optional<FullCategoryModel> optional, String category) {
         return new ApplicationModel<>() {
             @Override

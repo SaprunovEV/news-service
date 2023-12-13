@@ -26,8 +26,7 @@ import java.util.stream.Stream;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = CategoryController.class)
@@ -308,6 +307,54 @@ class CategoryControllerTest extends AbstractErrorControllerTest {
         String expected = StringTestUtils.readStringFromResources("/responses/v1/errors/create_empty_category_error_response.json");
 
         JsonAssert.assertJsonEquals(expected, actual);
+    }
+
+    @Test
+    void whenUpdateCategory_thenReturnOk() throws Exception {
+        mockMvc.perform(
+                    put(getUrl() + "/{id}", 1)
+                            .contentType(APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(UpsertCategoryRequest.builder().name("newName").build()))
+                )
+                .andExpect(status().isOk());
+    }
+
+    @Test
+    void whenUpdateCategoryWithId1_thenReturnUpdatedCategory() throws Exception {
+        long id = 1;
+
+        String name2update = "Test category " + id;
+
+        UpsertCategoryRequest request = createUpsertCategoryRequest(name2update);
+
+        CategoryWithNews category2update = CategoryWithNews.builder()
+                .name(name2update)
+                .id(id)
+                .news(new ArrayList<>())
+                .build();
+
+        when(mapper.requestWithIdToCategoryWithNews(request, id)).thenReturn(category2update);
+
+        CategoryWithNews updatedCategory = createCategoryWithNews(id, 3);
+        when(service.updateCategory(category2update)).thenReturn(updatedCategory);
+
+        when(mapper.categoryToCategoryResponse(updatedCategory)).thenReturn(createCategoryResponseWithNews(id, 3));
+
+        String actual = mockMvc.perform(
+                        put(getUrl() + "/{id}", id)
+                                .contentType(APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(UpsertCategoryRequest.builder().name(name2update).build()))
+                )
+                .andReturn().getResponse()
+                .getContentAsString();
+
+        String expected = StringTestUtils.readStringFromResources("/responses/v1/categories/update_category_with_id_1_request.json");
+
+        JsonAssert.assertJsonEquals(expected, actual);
+
+        verify(mapper, times(1)).requestWithIdToCategoryWithNews(request, id);
+        verify(service, times(1)).updateCategory(category2update);
+        verify(mapper, times(1)).categoryToCategoryResponse(updatedCategory);
     }
 
     @ParameterizedTest
