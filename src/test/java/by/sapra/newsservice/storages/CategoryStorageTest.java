@@ -2,12 +2,14 @@ package by.sapra.newsservice.storages;
 
 import by.sapra.newsservice.config.AbstractDataTest;
 import by.sapra.newsservice.models.CategoryEntity;
+import by.sapra.newsservice.models.NewsEntity;
 import by.sapra.newsservice.services.models.CategoryFilter;
 import by.sapra.newsservice.storages.mappers.MapperConf;
 import by.sapra.newsservice.storages.mappers.StorageCategoryMapper;
 import by.sapra.newsservice.storages.models.CategoryListModel;
 import by.sapra.newsservice.storages.models.CategoryModel;
 import by.sapra.newsservice.storages.models.FullCategoryModel;
+import by.sapra.newsservice.testUtils.TestDataBuilder;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -19,7 +21,10 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
+import static by.sapra.newsservice.testUtils.Category2NewsTestDataBuilder.aCategory2News;
 import static by.sapra.newsservice.testUtils.CategoryTestDataBuilder.aCategory;
+import static by.sapra.newsservice.testUtils.NewsTestDataBuilder.aNews;
+import static by.sapra.newsservice.testUtils.UserTestDataBuilder.aUser;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ContextHierarchy({
@@ -124,7 +129,7 @@ class CategoryStorageTest extends AbstractDataTest {
     }
 
     @Test
-    void shouldDoSomething() throws Exception {
+    void shouldReturnEmptyModel_whenCategoryNamAlreadyExist() throws Exception {
         String expected = "testName";
 
         getTestDbFacade().save(aCategory().withName(expected));
@@ -132,6 +137,61 @@ class CategoryStorageTest extends AbstractDataTest {
         FullCategoryModel categoryToSave = FullCategoryModel.builder().name(expected).news(new ArrayList<>()).build();
 
         Optional<FullCategoryModel> actual = storage.createCategory(categoryToSave);
+
+        assertTrue(actual.isEmpty());
+    }
+
+    @Test
+    void shouldReturnUpdatedEntity_whenCategoryIsNotExist() throws Exception {
+        TestDataBuilder<CategoryEntity> categoryBuilder = getTestDbFacade().persistedOnce(
+                aCategory()
+                        .withName("firstName")
+        );
+
+        TestDataBuilder<NewsEntity> newsBuilder = getTestDbFacade().persistedOnce(
+                aNews()
+                        .withUser(getTestDbFacade().persistedOnce(aUser()))
+        );
+
+        getTestDbFacade().save(
+                aCategory2News()
+                        .withCategory(categoryBuilder)
+                        .withNews(newsBuilder)
+        );
+
+        String name2update = "newname";
+        CategoryEntity oldCategory = categoryBuilder.build();
+
+        FullCategoryModel category2update = FullCategoryModel.builder()
+                .name(name2update)
+                .id(oldCategory.getId())
+                .news(new ArrayList<>())
+                .build();
+
+        Optional<FullCategoryModel> actual = storage.updateCategory(category2update);
+
+        assertAll(() -> {
+            assertTrue(actual.isPresent(), "не представлена");
+            FullCategoryModel model = actual.get();
+            assertEquals(category2update.getName(), model.getName());
+            assertNotNull(getTestDbFacade().find(oldCategory.getId(), CategoryEntity.class), "не правильно сохранил");
+            CategoryEntity entity = getTestDbFacade().find(model.getId(), CategoryEntity.class);
+            assertEquals(name2update, entity.getName());
+            assertEquals(1, entity.getCategory2News().size());
+        });
+    }
+
+    @Test
+    void shouldReturnEmptyOptional_whenCategoryNotFound() throws Exception {
+        getTestDbFacade().save(aCategory().withName("oldname"));
+
+        FullCategoryModel category2update = FullCategoryModel.builder()
+                .name("newname")
+                .id(Long.MAX_VALUE)
+                .news(new ArrayList<>())
+                .build();
+
+        Optional<FullCategoryModel> actual = storage.updateCategory(category2update);
 
         assertTrue(actual.isEmpty());
     }

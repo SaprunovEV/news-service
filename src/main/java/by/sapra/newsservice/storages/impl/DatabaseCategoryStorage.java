@@ -45,6 +45,23 @@ public class DatabaseCategoryStorage implements CategoryStorage {
         return Optional.ofNullable(mapper.entityToFullCategory(savedCategory));
     }
 
+    @Override
+    @Transactional
+    public Optional<FullCategoryModel> updateCategory(FullCategoryModel model2update) {
+        if (model2update.getId() <= 0 ) return Optional.empty();
+
+        Optional<CategoryEntity> optional = repository.findById(model2update.getId());
+
+        if (optional.isPresent()) {
+            CategoryEntity entity = optional.get();
+            entity.setName(model2update.getName());
+            repository.save(entity);
+            return Optional.of(mapper.entityToFullCategory(entity));
+        }
+
+        return Optional.empty();
+    }
+
     private CategoryListModel mapListModel(Page<CategoryEntity> page) {
         Map<Long, Long> countMap = new HashMap<>();
         List<CategoryEntity> content = page.getContent();

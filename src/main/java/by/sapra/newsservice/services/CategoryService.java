@@ -14,4 +14,6 @@ public interface CategoryService {
     ApplicationModel<CategoryWithNews, CategoryError> findById(long id);
 
     ApplicationModel<CategoryWithNews, CategoryError> saveCategory(CategoryWithNews category);
+
+    ApplicationModel<CategoryWithNews, CategoryError> updateCategory(CategoryWithNews news2update);
 }

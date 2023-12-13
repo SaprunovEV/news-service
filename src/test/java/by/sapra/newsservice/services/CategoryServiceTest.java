@@ -2,14 +2,12 @@ package by.sapra.newsservice.services;
 
 import by.sapra.newsservice.models.errors.CategoryError;
 import by.sapra.newsservice.services.mappers.CategoryModelMapper;
-import by.sapra.newsservice.services.models.ApplicationModel;
-import by.sapra.newsservice.services.models.Category;
-import by.sapra.newsservice.services.models.CategoryFilter;
-import by.sapra.newsservice.services.models.CategoryWithNews;
+import by.sapra.newsservice.services.models.*;
 import by.sapra.newsservice.storages.CategoryStorage;
 import by.sapra.newsservice.storages.models.CategoryListModel;
 import by.sapra.newsservice.storages.models.CategoryModel;
 import by.sapra.newsservice.storages.models.FullCategoryModel;
+import by.sapra.newsservice.storages.models.NewsModel;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -207,6 +205,89 @@ class CategoryServiceTest  {
 
         verify(mapper, times(1)).categoryWithNewsToFullCategoryModel(input);
         verify(storage, times(1)).createCategory(categoryToSave);
+    }
+
+    @Test
+    void shouldReturnApplicationModel_whenStorageUpdateCategory() throws Exception {
+        String name = "test name";
+        long id = 1L;
+
+        CategoryWithNews category2update = CategoryWithNews.builder()
+                .id(id)
+                .name(name)
+                .news(new ArrayList<>())
+                .build();
+
+        FullCategoryModel model2update = FullCategoryModel.builder()
+                .id(id)
+                .name(name)
+                .news(new ArrayList<>())
+                .build();
+        when(mapper.categoryWithNewsToFullCategoryModel(category2update)).thenReturn(model2update);
+
+        FullCategoryModel updatedModel = FullCategoryModel.builder()
+                .id(1L)
+                .news(List.of(
+                        NewsModel.builder().id(1).build(),
+                        NewsModel.builder().id(2).build(),
+                        NewsModel.builder().id(3).build()
+                        ))
+                .name(name)
+                .build();
+        when(storage.updateCategory(model2update)).thenReturn(Optional.of(updatedModel));
+
+        CategoryWithNews expected = CategoryWithNews.builder()
+                .news(List.of(
+                        News.builder().id(1L).build(),
+                        News.builder().id(2L).build(),
+                        News.builder().id(3L).build()
+                ))
+                .name(name)
+                .id(id)
+                .build();
+        when(mapper.fullCategoryToCategoryWithNews(updatedModel)).thenReturn(expected);
+
+        ApplicationModel<CategoryWithNews, CategoryError> actual = service.updateCategory(category2update);
+
+        assertAll(() -> {
+            assertNotNull(actual);
+            assertFalse(actual.hasError());
+            assertEquals(expected, actual.getData());
+        });
+
+        verify(mapper, times(1)).categoryWithNewsToFullCategoryModel(category2update);
+        verify(storage, times(1)).updateCategory(model2update);
+        verify(mapper, times(1)).fullCategoryToCategoryWithNews(updatedModel);
+    }
+
+    @Test
+    void shouldReturnEmptyOptional_whenCategoryNotFound() throws Exception {
+        String name = "test name";
+        long id = 1L;
+
+        CategoryWithNews category2update = CategoryWithNews.builder()
+                .id(id)
+                .name(name)
+                .news(new ArrayList<>())
+                .build();
+
+        FullCategoryModel model2update = FullCategoryModel.builder()
+                .id(id)
+                .name(name)
+                .news(new ArrayList<>())
+                .build();
+        when(mapper.categoryWithNewsToFullCategoryModel(category2update)).thenReturn(model2update);
+
+        when(storage.updateCategory(model2update)).thenReturn(Optional.empty());
+
+        ApplicationModel<CategoryWithNews, CategoryError> actual = service.updateCategory(category2update);
+
+        assertAll(() -> {
+            assertNotNull(actual);
+            assertTrue(actual.hasError());
+            assertNotNull(actual.getError());
+            assertTrue(actual.getError().getMessage().contains(String.valueOf(id)));
+        });
     }
 
     @NotNull

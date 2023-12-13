@@ -1,10 +1,11 @@
 package by.sapra.newsservice.services.mappers;
+
 import by.sapra.newsservice.services.models.Category;
+import by.sapra.newsservice.services.models.CategoryWithNews;
 import by.sapra.newsservice.storages.models.CategoryListModel;
 import by.sapra.newsservice.storages.models.CategoryModel;
 import by.sapra.newsservice.storages.models.FullCategoryModel;
 import by.sapra.newsservice.storages.models.NewsModel;
-import by.sapra.newsservice.services.models.CategoryWithNews;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;

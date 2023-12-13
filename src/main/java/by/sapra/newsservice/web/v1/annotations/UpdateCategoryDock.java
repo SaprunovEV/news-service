@@ -13,13 +13,13 @@ import java.lang.annotation.RetentionPolicy;
 
 @Retention(RetentionPolicy.RUNTIME)
 @Operation(
-        summary = "Saved new category.",
-        description = "Saved new category. Return saved category.",
-        method = "POST",
+        summary = "Updated category by id.",
+        description = "Updated category by id. Return updated category",
+        method = "PUT",
         tags = {"category", "V1"}
 )
 @ApiResponse(
-        responseCode = "201",
+        responseCode = "200",
         content = @Content(schema = @Schema(implementation = CategoryResponse.class))
 )
 @ApiResponse(
@@ -36,5 +36,5 @@ import java.lang.annotation.RetentionPolicy;
                 schema = @Schema(implementation = CategoryError.class),
                 examples = {@ExampleObject(value = "{\n\"message\": \"Имя категории должно быть между 5 и 50 символами\"\n}")})
 )
-public @interface CreateNewCategoryDock {
+public @interface UpdateCategoryDock {
 }

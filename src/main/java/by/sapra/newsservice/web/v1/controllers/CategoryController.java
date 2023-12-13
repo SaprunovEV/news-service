@@ -6,6 +6,7 @@ import by.sapra.newsservice.services.models.ApplicationModel;
 import by.sapra.newsservice.services.models.CategoryFilter;
 import by.sapra.newsservice.services.models.CategoryWithNews;
 import by.sapra.newsservice.web.v1.annotations.CreateNewCategoryDock;
+import by.sapra.newsservice.web.v1.annotations.UpdateCategoryDock;
 import by.sapra.newsservice.web.v1.mappers.CategoryMapper;
 import by.sapra.newsservice.web.v1.models.*;
 import io.swagger.v3.oas.annotations.Operation;
@@ -107,5 +108,17 @@ public class CategoryController {
             return ResponseEntity.badRequest().body(model.getError());
 
         return ResponseEntity.status(CREATED).body(mapper.categoryToCategoryResponse(model.getData()));
+    }
+
+    @PutMapping("/{id}")
+    @UpdateCategoryDock
+    public ResponseEntity<?> handleUpdateCategory(@Valid CategoryId id, @RequestBody @Valid UpsertCategoryRequest request) {
+        ApplicationModel<CategoryWithNews, CategoryError> model =
+                service.updateCategory(mapper.requestWithIdToCategoryWithNews(request, id.getId()));
+
+        if (model.hasError()) {
+            return ResponseEntity.badRequest().body(model.getError());
+        }
+        return ResponseEntity.ok(mapper.categoryToCategoryResponse(model.getData()));
     }
 }

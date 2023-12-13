@@ -7,6 +7,7 @@ import by.sapra.newsservice.web.v1.models.CategoryListResponse;
 import by.sapra.newsservice.web.v1.models.CategoryResponse;
 import by.sapra.newsservice.web.v1.models.UpsertCategoryRequest;
 import org.mapstruct.Mapper;
+import org.mapstruct.Mapping;
 
 import java.util.List;
 
@@ -25,4 +26,7 @@ public interface CategoryMapper {
     CategoryResponse categoryToCategoryResponse(CategoryWithNews category);
 
     CategoryWithNews requestToCategoryWithNews(UpsertCategoryRequest request);
+
+    @Mapping(source = "id", target = "id")
+    CategoryWithNews requestWithIdToCategoryWithNews(UpsertCategoryRequest request, long id);
 }

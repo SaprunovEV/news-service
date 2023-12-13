@@ -12,4 +12,6 @@ public interface CategoryStorage {
     Optional<FullCategoryModel> findById(long id);
 
     Optional<FullCategoryModel> createCategory(FullCategoryModel categoryToSave);
+
+    Optional<FullCategoryModel> updateCategory(FullCategoryModel model2update);
 }
