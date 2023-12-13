@@ -42,10 +42,15 @@ public class UserControllerTest extends AbstractErrorControllerTest {
         UserListResponse userListResponse = createUserListResponse(3);
         when(mapper.userListModelToUserListResponse(usersListModel)).thenReturn(userListResponse);
 
-        String actual = mockMvc.perform(get(getUrl()))
-                .andExpect(status().isOk())
-                .andReturn().getResponse()
-                .getContentAsString();
+        String actual = mockMvc.perform(
+                get(
+                        getUrl())
+                        .param("pageSize", String.valueOf(pageSize))
+                        .param("pageNumber", String.valueOf(pageNumber))
+                )
+                    .andExpect(status().isOk())
+                    .andReturn().getResponse()
+                    .getContentAsString();
 
         String expected = StringTestUtils.readStringFromResources("/responses/v1/users/find_all_users_response.json");
 
@@ -77,7 +82,7 @@ public class UserControllerTest extends AbstractErrorControllerTest {
     private List<UserItemResponse> createUserItemResponses(int count) {
         ArrayList<UserItemResponse> users = new ArrayList<>();
 
-        for (long i = 0; i < count; i++) {
+        for (long i = 1; i < count + 1; i++) {
             users.add(
                     UserItemResponse.builder().id(i).name("user name " + i).build()
             );
@@ -89,7 +94,7 @@ public class UserControllerTest extends AbstractErrorControllerTest {
 
     private List<UserItemModel> createUserItemModel(int count) {
         ArrayList<UserItemModel> users = new ArrayList<>();
-        for (long i = 0; i < count; i++) {
+        for (long i = 1; i < count + 1; i++) {
             users.add(
                     UserItemModel.builder()
                             .id(i)
