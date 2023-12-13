@@ -64,7 +64,7 @@ public class DatabaseCategoryStorage implements CategoryStorage {
 
     @Override
     public void deleteCategory(long id) {
-
+        repository.deleteById(id);
     }
 
     private CategoryListModel mapListModel(Page<CategoryEntity> page) {
