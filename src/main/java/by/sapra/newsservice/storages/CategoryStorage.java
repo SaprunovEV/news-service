@@ -14,4 +14,6 @@ public interface CategoryStorage {
     Optional<FullCategoryModel> createCategory(FullCategoryModel categoryToSave);
 
     Optional<FullCategoryModel> updateCategory(FullCategoryModel model2update);
+
+    void deleteCategory(long id);
 }

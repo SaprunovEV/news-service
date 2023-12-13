@@ -46,6 +46,11 @@ public class DatabaseCategoryService implements CategoryService {
         return createResult(optional, MessageFormat.format("Категория с ID: {0} не найдена!", category.getId()));
     }
 
+    @Override
+    public void deleteCategory(long id) {
+        storage.deleteCategory(id);
+    }
+
     private ApplicationModel<CategoryWithNews, CategoryError> createResult(Optional<FullCategoryModel> optional, String category) {
         return new ApplicationModel<>() {
             @Override

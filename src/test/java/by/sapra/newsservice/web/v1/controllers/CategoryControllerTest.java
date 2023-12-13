@@ -340,6 +340,30 @@ class CategoryControllerTest extends AbstractErrorControllerTest {
     }
 
     @Test
+    void whenDeleteCategory_thenReturnNoContent() throws Exception {
+        long id = 1L;
+
+        mockMvc.perform(delete(getUrl() + "/{id}", id))
+                .andExpect(status().isNoContent());
+
+        verify(service, times(1)).deleteCategory(id);
+    }
+
+    @Test
+    void whenDeletedIdIsNegative_shouldReturnError() throws Exception {
+        long id = -1;
+
+        assertValidateId(delete(getUrl() + "/{id}", id), status().isBadRequest(), "/responses/v1/errors/negative_id_error_response.json");
+    }
+
+    @Test
+    void whenDeletedIdIsZero_shouldReturnError() throws Exception {
+        long id = 0;
+
+        assertValidateId(delete(getUrl() + "/{id}", id), status().isBadRequest(), "/responses/v1/errors/negative_id_error_response.json");
+    }
+
+    @Test
     void whenUpdatedCategoryName_isEmpty_thenReturnError() throws Exception {
         UpsertCategoryRequest request = createUpsertCategoryRequest(null);
         MockHttpServletRequestBuilder method = put(getUrl() + "/1")

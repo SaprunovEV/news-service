@@ -1,6 +1,7 @@
 package by.sapra.newsservice.storages;
 
 import by.sapra.newsservice.config.AbstractDataTest;
+import by.sapra.newsservice.models.Category2News;
 import by.sapra.newsservice.models.CategoryEntity;
 import by.sapra.newsservice.models.NewsEntity;
 import by.sapra.newsservice.services.models.CategoryFilter;
@@ -194,6 +195,26 @@ class CategoryStorageTest extends AbstractDataTest {
         Optional<FullCategoryModel> actual = storage.updateCategory(category2update);
 
         assertTrue(actual.isEmpty());
+    }
+    @Test
+    void shouldDeleteCategoryWithAllLinks() throws Exception {
+        TestDataBuilder<CategoryEntity> categoryBuilder = getTestDbFacade().persistedOnce(aCategory());
+        Category2News save = getTestDbFacade().save(
+                aCategory2News()
+                        .withCategory(categoryBuilder)
+                        .withNews(aNews().withUser(
+                                getTestDbFacade().persistedOnce(aUser())
+                        ))
+        );
+
+        Long id = categoryBuilder.build().getId();
+
+        storage.deleteCategory(id);
+
+        assertAll(() -> {
+            assertNull(getTestDbFacade().find(id, CategoryEntity.class));
+            assertNull(getTestDbFacade().find(save.getId(), CategoryEntity.class));
+        });
     }
 
     private List<CategoryModel> createListCategoryModel(List<CategoryEntity> expected, Map<Long, Long> countMap) {

@@ -290,6 +290,15 @@ class CategoryServiceTest  {
         });
     }
 
+    @Test
+    void shouldDeleteCategoryById() throws Exception {
+        long id = 1L;
+
+        service.deleteCategory(id);
+
+        verify(storage, times(1)).deleteCategory(id);
+    }
+
     @NotNull
     private static List<Category> createCategoryList(long count) {
         ArrayList<Category> list = new ArrayList<>();
