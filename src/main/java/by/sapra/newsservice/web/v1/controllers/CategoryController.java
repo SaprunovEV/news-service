@@ -6,6 +6,7 @@ import by.sapra.newsservice.services.models.ApplicationModel;
 import by.sapra.newsservice.services.models.CategoryFilter;
 import by.sapra.newsservice.services.models.CategoryWithNews;
 import by.sapra.newsservice.web.v1.annotations.CreateNewCategoryDock;
+import by.sapra.newsservice.web.v1.annotations.DeleteCategoryDock;
 import by.sapra.newsservice.web.v1.annotations.UpdateCategoryDock;
 import by.sapra.newsservice.web.v1.mappers.CategoryMapper;
 import by.sapra.newsservice.web.v1.models.*;
@@ -120,5 +121,12 @@ public class CategoryController {
             return ResponseEntity.badRequest().body(model.getError());
         }
         return ResponseEntity.ok(mapper.categoryToCategoryResponse(model.getData()));
+    }
+
+    @DeleteMapping("/{id}")
+    @DeleteCategoryDock
+    public ResponseEntity<Void> handleDeleteCategory(@Valid CategoryId id) {
+        service.deleteCategory(id.getId());
+        return ResponseEntity.noContent().build();
     }
 }
