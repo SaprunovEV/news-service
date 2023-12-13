@@ -3,6 +3,7 @@ package by.sapra.newsservice.web.v1.controllers;
 import by.sapra.newsservice.services.UserService;
 import by.sapra.newsservice.services.models.UserItemModel;
 import by.sapra.newsservice.services.models.UserListModel;
+import by.sapra.newsservice.services.models.filters.UserFilter;
 import by.sapra.newsservice.testUtils.StringTestUtils;
 import by.sapra.newsservice.web.v1.AbstractErrorControllerTest;
 import by.sapra.newsservice.web.v1.mappers.UserResponseMapper;
@@ -29,8 +30,14 @@ public class UserControllerTest extends AbstractErrorControllerTest {
 
     @Test
     void whenCallFindAllUsers_thenReturnStatusOk_thenReturnUsers() throws Exception {
-        UserListModel usersListModel = createUserListModel(3);
-        when(service.findAllUsers()).thenReturn(usersListModel);
+        int pageNumber = 0;
+        int pageSize = 3;
+
+        UserListModel usersListModel = createUserListModel(pageSize);
+
+        UserFilter filter = createFilter(pageNumber, pageSize);
+
+        when(service.findAllUsers(filter)).thenReturn(usersListModel);
 
         UserListResponse userListResponse = createUserListResponse(3);
         when(mapper.userListModelToUserListResponse(usersListModel)).thenReturn(userListResponse);
@@ -44,8 +51,15 @@ public class UserControllerTest extends AbstractErrorControllerTest {
 
         JsonAssert.assertJsonEquals(expected, actual);
 
-        verify(service, times(1)).findAllUsers();
+        verify(service, times(1)).findAllUsers(filter);
         verify(mapper, times(1)).userListModelToUserListResponse(usersListModel);
+    }
+
+    private static UserFilter createFilter(int pageNumber, int pageSize) {
+        return UserFilter.builder()
+                .pageNumber(pageNumber)
+                .pageSize(pageSize)
+                .build();
     }
 
     private UserListModel createUserListModel(int count) {

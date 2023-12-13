@@ -1,7 +1,8 @@
 package by.sapra.newsservice.services;
 
 import by.sapra.newsservice.services.models.UserListModel;
+import by.sapra.newsservice.services.models.filters.UserFilter;
 
 public interface UserService {
-    UserListModel findAllUsers();
+    UserListModel findAllUsers(UserFilter filter);
 }
