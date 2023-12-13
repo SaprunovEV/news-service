@@ -40,8 +40,10 @@ public class DatabaseCategoryService implements CategoryService {
     }
 
     @Override
-    public ApplicationModel<CategoryWithNews, CategoryError> updateCategory(CategoryWithNews news2update) {
-        return null;
+    public ApplicationModel<CategoryWithNews, CategoryError> updateCategory(CategoryWithNews category) {
+        Optional<FullCategoryModel> optional = storage
+                .updateCategory(mapper.categoryWithNewsToFullCategoryModel(category));
+        return createResult(optional, MessageFormat.format("Категория с ID: {0} не найдена!", category.getId()));
     }
 
     private ApplicationModel<CategoryWithNews, CategoryError> createResult(Optional<FullCategoryModel> optional, String category) {
