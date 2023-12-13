@@ -124,7 +124,7 @@ class CategoryStorageTest extends AbstractDataTest {
     }
 
     @Test
-    void shouldDoSomething() throws Exception {
+    void shouldReturnEmptyModel_whenCategoryNamAlreadyExist() throws Exception {
         String expected = "testName";
 
         getTestDbFacade().save(aCategory().withName(expected));
