@@ -19,7 +19,7 @@ import java.lang.annotation.RetentionPolicy;
         tags = {"category", "V1"}
 )
 @ApiResponse(
-        responseCode = "200",
+        responseCode = "201",
         content = @Content(schema = @Schema(implementation = CategoryResponse.class))
 )
 @ApiResponse(
