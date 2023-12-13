@@ -46,6 +46,7 @@ public class DatabaseCategoryStorage implements CategoryStorage {
     }
 
     @Override
+    @Transactional
     public Optional<FullCategoryModel> updateCategory(FullCategoryModel model2update) {
         if (model2update.getId() <= 0 ) return Optional.empty();
 
@@ -54,6 +55,7 @@ public class DatabaseCategoryStorage implements CategoryStorage {
         if (optional.isPresent()) {
             CategoryEntity entity = optional.get();
             entity.setName(model2update.getName());
+            repository.save(entity);
             return Optional.of(mapper.entityToFullCategory(entity));
         }
 
