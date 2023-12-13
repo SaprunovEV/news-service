@@ -291,32 +291,19 @@ class CategoryControllerTest extends AbstractErrorControllerTest {
     @Test
     void whenCategoryName_isEmpty_thenReturnError() throws Exception {
         UpsertCategoryRequest request = createUpsertCategoryRequest(null);
-
-        MockHttpServletResponse response = mockMvc.perform(
-                        post(getUrl())
-                                .contentType(APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest())
-                .andReturn()
-                .getResponse();
-
-        response.setCharacterEncoding("UTF-8");
-
-        String actual = response.getContentAsString();
-
-        String expected = StringTestUtils.readStringFromResources("/responses/v1/errors/create_empty_category_error_response.json");
-
-        JsonAssert.assertJsonEquals(expected, actual);
+        MockHttpServletRequestBuilder method = post(getUrl())
+                .contentType(APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request));
+        assertValidation(method, "/responses/v1/errors/create_empty_category_error_response.json");
     }
-
-    @Test
-    void whenUpdateCategory_thenReturnOk() throws Exception {
-        mockMvc.perform(
-                    put(getUrl() + "/{id}", 1)
-                            .contentType(APPLICATION_JSON)
-                            .content(objectMapper.writeValueAsString(UpsertCategoryRequest.builder().name("newName").build()))
-                )
-                .andExpect(status().isOk());
+    @ParameterizedTest
+    @MethodSource("invalidSizeCategoryName")
+    void whenCategoryName_isLessThen5_OrMoreThen50_thenReturnError(String name) throws Exception {
+        UpsertCategoryRequest request = createUpsertCategoryRequest(name);
+        MockHttpServletRequestBuilder method = post(getUrl())
+                .contentType(APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request));
+        assertValidation(method, "/responses/v1/errors/create_not_less_or_more_then_posible_category_name_error_response.json");
     }
 
     @Test
@@ -336,7 +323,11 @@ class CategoryControllerTest extends AbstractErrorControllerTest {
         when(mapper.requestWithIdToCategoryWithNews(request, id)).thenReturn(category2update);
 
         CategoryWithNews updatedCategory = createCategoryWithNews(id, 3);
-        when(service.updateCategory(category2update)).thenReturn(updatedCategory);
+        ApplicationModel<CategoryWithNews, CategoryError> model = mock(ApplicationModel.class);
+        when(service.updateCategory(category2update)).thenReturn(model);
+
+        when(model.hasError()).thenReturn(false);
+        when(model.getData()).thenReturn(updatedCategory);
 
         when(mapper.categoryToCategoryResponse(updatedCategory)).thenReturn(createCategoryResponseWithNews(id, 3));
 
@@ -345,6 +336,7 @@ class CategoryControllerTest extends AbstractErrorControllerTest {
                                 .contentType(APPLICATION_JSON)
                                 .content(objectMapper.writeValueAsString(UpsertCategoryRequest.builder().name(name2update).build()))
                 )
+                .andExpect(status().isOk())
                 .andReturn().getResponse()
                 .getContentAsString();
 
@@ -357,15 +349,72 @@ class CategoryControllerTest extends AbstractErrorControllerTest {
         verify(mapper, times(1)).categoryToCategoryResponse(updatedCategory);
     }
 
-    @ParameterizedTest
-    @MethodSource("invalidSizeCategoryName")
-    void whenCategoryName_isLessThen5_OrMoreThen50_thenReturnError(String name) throws Exception {
-        UpsertCategoryRequest request = createUpsertCategoryRequest(name);
+    @Test
+    void whenUpdateIsNotPossible_thenReturnError() throws Exception {
+        long id = 2l;
+        String name2update = "Test category " + id;
+
+        UpsertCategoryRequest request = createUpsertCategoryRequest(name2update);
+
+        CategoryWithNews category2update = CategoryWithNews.builder()
+                .name(name2update)
+                .id(id)
+                .news(new ArrayList<>())
+                .build();
+
+        when(mapper.requestWithIdToCategoryWithNews(request, id)).thenReturn(category2update);
+
+        ApplicationModel<CategoryWithNews, CategoryError> model = mock(ApplicationModel.class);
+        when(service.updateCategory(category2update)).thenReturn(model);
+
+        when(model.hasError()).thenReturn(true);
+        CategoryError error = createCategoryNotFoundError(id);
+        when(model.getError()).thenReturn(error);
 
         MockHttpServletResponse response = mockMvc.perform(
-                        post(getUrl())
+                        put(getUrl() + "/{id}", id)
                                 .contentType(APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request)))
+                                .content(objectMapper.writeValueAsString(request))
+                )
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse();
+
+        response.setCharacterEncoding("UTF-8");
+
+        String actual = response.getContentAsString();
+
+        String expected = StringTestUtils.readStringFromResources("/responses/v1/categories/category_not_found_error_response.json");
+
+        JsonAssert.assertJsonEquals(expected, actual);
+
+        verify(mapper, times(1)).requestWithIdToCategoryWithNews(request, id);
+        verify(service, times(1)).updateCategory(category2update);
+        verify(model, times(1)).hasError();
+        verify(model, times(1)).getError();
+    }
+
+    @Test
+    void whenUpdatedCategoryName_isEmpty_thenReturnError() throws Exception {
+        UpsertCategoryRequest request = createUpsertCategoryRequest(null);
+        MockHttpServletRequestBuilder method = put(getUrl() + "/1")
+                .contentType(APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request));
+        assertValidation(method,"/responses/v1/errors/create_empty_category_error_response.json");
+    }
+
+    @ParameterizedTest
+    @MethodSource("invalidSizeCategoryName")
+    void whenUpdatedCategoryName_isLessThen5_OrMoreThen50_thenReturnError(String name) throws Exception {
+        UpsertCategoryRequest request = createUpsertCategoryRequest(name);
+        MockHttpServletRequestBuilder method = put(getUrl() + "/1")
+                .contentType(APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request));
+        assertValidation(method, "/responses/v1/errors/create_not_less_or_more_then_posible_category_name_error_response.json");
+    }
+    private void assertValidation(MockHttpServletRequestBuilder method, String path) throws Exception {
+
+        MockHttpServletResponse response = mockMvc.perform(
+                        method)
                 .andExpect(status().isBadRequest())
                 .andReturn()
                 .getResponse();
@@ -374,7 +423,7 @@ class CategoryControllerTest extends AbstractErrorControllerTest {
 
         String actual = response.getContentAsString();
 
-        String expected = StringTestUtils.readStringFromResources("/responses/v1/errors/create_not_less_or_more_then_posible_category_name_error_response.json");
+        String expected = StringTestUtils.readStringFromResources(path);
 
         JsonAssert.assertJsonEquals(expected, actual);
     }

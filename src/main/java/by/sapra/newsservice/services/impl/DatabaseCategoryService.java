@@ -40,7 +40,7 @@ public class DatabaseCategoryService implements CategoryService {
     }
 
     @Override
-    public CategoryWithNews updateCategory(CategoryWithNews news2update) {
+    public ApplicationModel<CategoryWithNews, CategoryError> updateCategory(CategoryWithNews news2update) {
         return null;
     }
 

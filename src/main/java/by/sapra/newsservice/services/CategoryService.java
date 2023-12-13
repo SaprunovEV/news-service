@@ -15,5 +15,5 @@ public interface CategoryService {
 
     ApplicationModel<CategoryWithNews, CategoryError> saveCategory(CategoryWithNews category);
 
-    CategoryWithNews updateCategory(CategoryWithNews news2update);
+    ApplicationModel<CategoryWithNews, CategoryError> updateCategory(CategoryWithNews news2update);
 }
