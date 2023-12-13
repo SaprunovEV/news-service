@@ -48,7 +48,7 @@ public class DatabaseCategoryService implements CategoryService {
 
     @Override
     public void deleteCategory(long id) {
-
+        storage.deleteCategory(id);
     }
 
     private ApplicationModel<CategoryWithNews, CategoryError> createResult(Optional<FullCategoryModel> optional, String category) {

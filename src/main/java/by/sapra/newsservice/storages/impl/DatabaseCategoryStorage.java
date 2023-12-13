@@ -62,6 +62,11 @@ public class DatabaseCategoryStorage implements CategoryStorage {
         return Optional.empty();
     }
 
+    @Override
+    public void deleteCategory(long id) {
+
+    }
+
     private CategoryListModel mapListModel(Page<CategoryEntity> page) {
         Map<Long, Long> countMap = new HashMap<>();
         List<CategoryEntity> content = page.getContent();
