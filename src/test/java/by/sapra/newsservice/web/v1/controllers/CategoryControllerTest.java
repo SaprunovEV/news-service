@@ -17,6 +17,7 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.test.web.servlet.ResultMatcher;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import java.text.MessageFormat;
@@ -166,18 +167,7 @@ class CategoryControllerTest extends AbstractErrorControllerTest {
         CategoryError categoryErrorError = createCategoryNotFoundError(id);
         when(model.getError()).thenReturn(categoryErrorError);
 
-        MockHttpServletResponse response = mockMvc.perform(get(getUrl() + "/{id}", id))
-                .andExpect(status().isNotFound())
-                .andReturn().getResponse();
-
-        response.setCharacterEncoding("UTF-8");
-
-        String actual = response.getContentAsString();
-
-        String expected = StringTestUtils.readStringFromResources("/responses/v1/categories/category_not_found_error_response.json");
-
-
-        JsonAssert.assertJsonEquals(expected, actual);
+        assertValidateId(get(getUrl() + "/{id}", id), status().isNotFound(), "/responses/v1/categories/category_not_found_error_response.json");
 
         verify(service, times(1)).findById(id);
     }
@@ -186,34 +176,14 @@ class CategoryControllerTest extends AbstractErrorControllerTest {
     void whenIdIsNegative_shouldReturnError() throws Exception {
         long id = -1;
 
-        MockHttpServletResponse response = mockMvc.perform(get(getUrl() + "/{id}", id))
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse();
-
-        response.setCharacterEncoding("UTF-8");
-
-        String actual = response.getContentAsString();
-
-        String expected = StringTestUtils.readStringFromResources("/responses/v1/errors/negative_id_error_response.json");
-
-        JsonAssert.assertJsonEquals(expected, actual);
+        assertValidateId(get(getUrl() + "/{id}", id), status().isBadRequest(), "/responses/v1/errors/negative_id_error_response.json");
     }
 
     @Test
     void whenIdIsZero_shouldReturnError() throws Exception {
         long id = 0;
 
-        MockHttpServletResponse response = mockMvc.perform(get(getUrl() + "/{id}", id))
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse();
-
-        response.setCharacterEncoding("UTF-8");
-
-        String actual = response.getContentAsString();
-
-        String expected = StringTestUtils.readStringFromResources("/responses/v1/errors/negative_id_error_response.json");
-
-        JsonAssert.assertJsonEquals(expected, actual);
+        assertValidateId(get(getUrl() + "/{id}", id), status().isBadRequest(), "/responses/v1/errors/negative_id_error_response.json");
     }
 
     @Test
@@ -266,21 +236,9 @@ class CategoryControllerTest extends AbstractErrorControllerTest {
         when(model.getError()).thenReturn(categoryExist);
         when(model.getError()).thenReturn(categoryExist);
 
-        MockHttpServletResponse response = mockMvc.perform(
-                        post(getUrl())
-                                .contentType(APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request)))
-                .andExpect(status().isBadRequest())
-                .andReturn()
-                .getResponse();
-
-        response.setCharacterEncoding("UTF-8");
-
-        String actual = response.getContentAsString();
-
-        String expected = StringTestUtils.readStringFromResources("/responses/v1/errors/save_existing_category_response.json");
-
-        JsonAssert.assertJsonEquals(expected, actual);
+        assertValidateId(post(getUrl())
+                .contentType(APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)), status().isBadRequest(), "/responses/v1/errors/save_existing_category_response.json");
 
         verify(mapper, times(1)).requestToCategoryWithNews(request);
         verify(model, times(1)).hasError();
@@ -371,21 +329,9 @@ class CategoryControllerTest extends AbstractErrorControllerTest {
         CategoryError error = createCategoryNotFoundError(id);
         when(model.getError()).thenReturn(error);
 
-        MockHttpServletResponse response = mockMvc.perform(
-                        put(getUrl() + "/{id}", id)
-                                .contentType(APPLICATION_JSON)
-                                .content(objectMapper.writeValueAsString(request))
-                )
-                .andExpect(status().isBadRequest())
-                .andReturn().getResponse();
-
-        response.setCharacterEncoding("UTF-8");
-
-        String actual = response.getContentAsString();
-
-        String expected = StringTestUtils.readStringFromResources("/responses/v1/categories/category_not_found_error_response.json");
-
-        JsonAssert.assertJsonEquals(expected, actual);
+        assertValidateId(put(getUrl() + "/{id}", id)
+                .contentType(APPLICATION_JSON)
+                .content(objectMapper.writeValueAsString(request)), status().isBadRequest(), "/responses/v1/categories/category_not_found_error_response.json");
 
         verify(mapper, times(1)).requestWithIdToCategoryWithNews(request, id);
         verify(service, times(1)).updateCategory(category2update);
@@ -411,13 +357,25 @@ class CategoryControllerTest extends AbstractErrorControllerTest {
                 .content(objectMapper.writeValueAsString(request));
         assertValidation(method, "/responses/v1/errors/create_not_less_or_more_then_posible_category_name_error_response.json");
     }
-    private void assertValidation(MockHttpServletRequestBuilder method, String path) throws Exception {
 
-        MockHttpServletResponse response = mockMvc.perform(
-                        method)
-                .andExpect(status().isBadRequest())
-                .andReturn()
-                .getResponse();
+    @Test
+    void whenUpdatedIdIsNegative_shouldReturnError() throws Exception {
+        long id = -1;
+
+        assertValidateId(put(getUrl() + "/{id}", id), status().isBadRequest(), "/responses/v1/errors/negative_id_error_response.json");
+    }
+
+    @Test
+    void whenUpdatedIdIsZero_shouldReturnError() throws Exception {
+        long id = 0;
+
+        assertValidateId(put(getUrl() + "/{id}", id), status().isBadRequest(), "/responses/v1/errors/negative_id_error_response.json");
+    }
+
+    private void assertValidateId(MockHttpServletRequestBuilder id, ResultMatcher BadRequest, String path) throws Exception {
+        MockHttpServletResponse response = mockMvc.perform(id)
+                .andExpect(BadRequest)
+                .andReturn().getResponse();
 
         response.setCharacterEncoding("UTF-8");
 
@@ -426,6 +384,10 @@ class CategoryControllerTest extends AbstractErrorControllerTest {
         String expected = StringTestUtils.readStringFromResources(path);
 
         JsonAssert.assertJsonEquals(expected, actual);
+    }
+    private void assertValidation(MockHttpServletRequestBuilder method, String path) throws Exception {
+
+        assertValidateId(method, status().isBadRequest(), path);
     }
 
     public static Stream<Arguments> invalidSizeCategoryName() {
