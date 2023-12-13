@@ -22,7 +22,7 @@ import java.lang.annotation.RetentionPolicy;
 )
 @ApiResponse(
         responseCode = "406",
-        description = "Category validation error.",
+        description = "ID validation error.",
         content = @Content(
                 schema = @Schema(implementation = CategoryError.class),
                 examples = {@ExampleObject(value = "{\n\"message\": \"ID должен быть > 0\"\n}")})
