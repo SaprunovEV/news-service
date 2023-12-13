@@ -74,6 +74,23 @@ class CategoryMapperTest {
         });
     }
 
+    @Test
+    void shouldMapRequestToCategoryWithNewsAndId() throws Exception {
+        UpsertCategoryRequest expected = UpsertCategoryRequest.builder()
+                .name("testCategoryName")
+                .build();
+
+        long id = 1L;
+
+        CategoryWithNews actual = mapper.requestWithIdToCategoryWithNews(expected, id);
+
+        assertAll(() -> {
+            assertNotNull(actual);
+            assertEquals(expected.getName(), actual.getName());
+            assertEquals(id, actual.getId());
+        });
+    }
+
     private CategoryWithNews createCategoryFullModel(long id, String name) {
 
         return CategoryWithNews.builder()
