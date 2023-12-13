@@ -112,9 +112,9 @@ public class CategoryController {
 
     @PutMapping("/{id}")
     @UpdateCategoryDock
-    public ResponseEntity<?> handleUpdateCategory(@Valid CategoryId categoryId, @RequestBody @Valid UpsertCategoryRequest request) {
+    public ResponseEntity<?> handleUpdateCategory(@Valid CategoryId id, @RequestBody @Valid UpsertCategoryRequest request) {
         ApplicationModel<CategoryWithNews, CategoryError> model =
-                service.updateCategory(mapper.requestWithIdToCategoryWithNews(request, categoryId.getId()));
+                service.updateCategory(mapper.requestWithIdToCategoryWithNews(request, id.getId()));
 
         if (model.hasError()) {
             return ResponseEntity.badRequest().body(model.getError());
