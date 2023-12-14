@@ -1,7 +1,9 @@
 package by.sapra.newsservice.services.impl;
 
+import by.sapra.newsservice.models.errors.UserError;
 import by.sapra.newsservice.services.UserService;
 import by.sapra.newsservice.services.mappers.UserServiceMapper;
+import by.sapra.newsservice.services.models.ApplicationModel;
 import by.sapra.newsservice.services.models.UserItemModel;
 import by.sapra.newsservice.services.models.UserListModel;
 import by.sapra.newsservice.services.models.filters.UserFilter;
@@ -21,7 +23,7 @@ public class DatabaseUserService implements UserService {
     }
 
     @Override
-    public UserItemModel findUserById(long id) {
+    public ApplicationModel<UserItemModel, UserError> findUserById(long id) {
         return null;
     }
 }
