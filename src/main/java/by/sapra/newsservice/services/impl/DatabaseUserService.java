@@ -2,6 +2,7 @@ package by.sapra.newsservice.services.impl;
 
 import by.sapra.newsservice.services.UserService;
 import by.sapra.newsservice.services.mappers.UserServiceMapper;
+import by.sapra.newsservice.services.models.UserItemModel;
 import by.sapra.newsservice.services.models.UserListModel;
 import by.sapra.newsservice.services.models.filters.UserFilter;
 import by.sapra.newsservice.storages.UserStorage;
@@ -17,5 +18,10 @@ public class DatabaseUserService implements UserService {
     @Override
     public UserListModel findAllUsers(UserFilter filter) {
         return mapper.storageUserListToUserListModel(storage.findAll(filter));
+    }
+
+    @Override
+    public UserItemModel findUserById(long id) {
+        return null;
     }
 }

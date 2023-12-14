@@ -4,6 +4,7 @@ import by.sapra.newsservice.services.UserService;
 import by.sapra.newsservice.services.models.filters.UserFilter;
 import by.sapra.newsservice.web.v1.annotations.FindAllUsersDock;
 import by.sapra.newsservice.web.v1.mappers.UserResponseMapper;
+import by.sapra.newsservice.web.v1.models.UserId;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
@@ -23,5 +24,12 @@ public class UserController {
     @FindAllUsersDock
     public ResponseEntity<?> handleFindAll(@Valid UserFilter filter) {
         return ResponseEntity.ok(mapper.userListModelToUserListResponse(service.findAllUsers(filter)));
+    }
+
+    @GetMapping("/{id}")
+    public ResponseEntity<?> handleFindById(@Valid UserId id) {
+        return ResponseEntity.ok(
+                mapper.serviceUserItemToUserItemResponse(service.findUserById(id.getId()))
+        );
     }
 }
