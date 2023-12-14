@@ -52,6 +52,27 @@ class UserServiceTest {
         verify(mapper, times(1)).storageUserListToUserListModel(storageUserList);
     }
 
+    @Test
+    void whenFindAll_thenReturnEmptyModel_ifUsersNotExist() throws Exception {
+        UserFilter filter = createFilter(0,3);
+
+        StorageUserList storageUserList = createStorageUserList(0);
+
+        when(storage.findAll(filter)).thenReturn(storageUserList);
+
+        UserListModel result = createUserListModel(0);
+        when(mapper.storageUserListToUserListModel(storageUserList)).thenReturn(result);
+
+        UserListModel actual = service.findAllUsers(filter);
+
+        assertAll(() -> {
+            assertNotNull(actual);
+        });
+
+        verify(storage, times(1)).findAll(filter);
+        verify(mapper, times(1)).storageUserListToUserListModel(storageUserList);
+    }
+
     private static StorageUserList createStorageUserList(int count) {
         ArrayList<StorageUserItem> users = new ArrayList<>();
 
