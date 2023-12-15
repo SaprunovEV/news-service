@@ -131,7 +131,7 @@ public class UserControllerTest extends AbstractErrorControllerTest {
 
         String actual = response.getContentAsString();
 
-        String expected = StringTestUtils.readStringFromResources("/responses/v1/users/user_not_found_error.json");
+        String expected = StringTestUtils.readStringFromResources("/responses/v1/errors/user_not_found_error.json");
 
         JsonAssert.assertJsonEquals(expected, actual);
 
@@ -239,7 +239,7 @@ public class UserControllerTest extends AbstractErrorControllerTest {
 
         String actual = response.getContentAsString();
 
-        String expected = StringTestUtils.readStringFromResources("/responses/v1/users/username_validation_error_response.json");
+        String expected = StringTestUtils.readStringFromResources("/responses/v1/errors/username_validation_error_response.json");
 
         JsonAssert.assertJsonEquals(expected, actual);
     }
@@ -263,7 +263,7 @@ public class UserControllerTest extends AbstractErrorControllerTest {
 
         String actual = response.getContentAsString();
 
-        String expected = StringTestUtils.readStringFromResources("/responses/v1/users/username_empty_error_response.json");
+        String expected = StringTestUtils.readStringFromResources("/responses/v1/errors/username_empty_error_response.json");
 
         JsonAssert.assertJsonEquals(expected, actual);
     }
