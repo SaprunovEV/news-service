@@ -12,6 +12,7 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextHierarchy;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Stream;
 
 import static by.sapra.newsservice.testUtils.UserTestDataBuilder.aUser;
@@ -61,6 +62,31 @@ class UserStorageTest extends AbstractDataTest {
             assertNotNull(actual);
             assertNotNull(actual.getUsers());
             assertTrue(actual.getUsers().isEmpty());
+        });
+    }
+
+    @Test
+    void whenFindById_thenReturnUserById() throws Exception {
+        UserEntity entity = getTestDbFacade().save(aUser().withName("username"));
+
+        StorageUserItem expected = StorageUserItem.builder().id(entity.getId()).name(entity.getName()).build();
+
+        Optional<StorageUserItem> actual = storage.findById(entity.getId());
+
+        assertAll(() -> {
+            assertNotNull(actual);
+            assertTrue(actual.isPresent());
+            assertEquals(expected, actual.get());
+        });
+    }
+
+    @Test
+    void whenFindById_and_userNotFound_thenReturnEmptyOptional() throws Exception {
+        Optional<StorageUserItem> actual = storage.findById(1);
+
+        assertAll(() -> {
+            assertNotNull(actual);
+            assertTrue(actual.isEmpty());
         });
     }
 

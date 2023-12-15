@@ -38,6 +38,19 @@ class UserResponseMapperTest {
         });
     }
 
+    @Test
+    void shouldMapUserItemModelToUserItemResponse() throws Exception {
+        UserItemModel expected = UserItemModel.builder().id(1).name("name").build();
+
+        UserItemResponse actual = mapper.serviceUserItemToUserItemResponse(expected);
+
+        assertAll(() -> {
+            assertNotNull(actual);
+            assertEquals(expected.getName(), actual.getName());
+            assertEquals(expected.getId(), actual.getId());
+        });
+    }
+
     private void assertUserItemResponse(UserItemModel expected, UserItemResponse actual) {
         assertAll(() -> {
             assertEquals(expected.getId(), actual.getId());
