@@ -39,6 +39,19 @@ class UserServiceMapperTest {
         });
     }
 
+    @Test
+    void shouldMapStorageUseerItemToUserItemModel() throws Exception {
+        StorageUserItem expected = StorageUserItem.builder().name("name").id(1L).build();
+
+        UserItemModel actual = mapper.storageUserItemToUserItemModel(expected);
+
+        assertAll(() -> {
+            assertNotNull(actual);
+            assertEquals(expected.getName(), actual.getName());
+            assertEquals(expected.getId(), actual.getId());
+        });
+    }
+
     private void assertServiceUserItem(StorageUserItem expected, UserItemModel actual) {
         assertAll(() -> {
             assertEquals(expected.getId(), actual.getId());
