@@ -12,6 +12,7 @@ import by.sapra.newsservice.web.v1.mappers.UserResponseMapper;
 import by.sapra.newsservice.web.v1.models.UpsertUserRequest;
 import by.sapra.newsservice.web.v1.models.UserItemResponse;
 import by.sapra.newsservice.web.v1.models.UserListResponse;
+import net.bytebuddy.utility.RandomString;
 import net.javacrumbs.jsonunit.JsonAssert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -219,6 +220,53 @@ public class UserControllerTest extends AbstractErrorControllerTest {
         verify(model, times(1)).getError();
     }
 
+    @Test
+    void whenCreateUser_withLongName_thenReturnError() throws Exception {
+        String username = RandomString.make(51);
+
+        UpsertUserRequest request = UpsertUserRequest.builder()
+                .name(username)
+                .build();
+
+        MockHttpServletResponse response = mockMvc.perform(
+                        post(getUrl())
+                                .contentType(APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
+                ).andExpect(status().isBadRequest())
+                .andReturn().getResponse();
+
+        response.setCharacterEncoding("UTF-8");
+
+        String actual = response.getContentAsString();
+
+        String expected = StringTestUtils.readStringFromResources("/responses/v1/users/username_validation_error_response.json");
+
+        JsonAssert.assertJsonEquals(expected, actual);
+    }
+
+    @Test
+    void whenCreateUser_withEmptyName_thenReturnError() throws Exception {
+        String username ="";
+
+        UpsertUserRequest request = UpsertUserRequest.builder()
+                .name(username)
+                .build();
+
+        MockHttpServletResponse response = mockMvc.perform(
+                        post(getUrl())
+                                .contentType(APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
+                ).andExpect(status().isBadRequest())
+                .andReturn().getResponse();
+
+        response.setCharacterEncoding("UTF-8");
+
+        String actual = response.getContentAsString();
+
+        String expected = StringTestUtils.readStringFromResources("/responses/v1/users/username_empty_error_response.json");
+
+        JsonAssert.assertJsonEquals(expected, actual);
+    }
     private static UserFilter createFilter(int pageNumber, int pageSize) {
         return UserFilter.builder()
                 .pageNumber(pageNumber)
