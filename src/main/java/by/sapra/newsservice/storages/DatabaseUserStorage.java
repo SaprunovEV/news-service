@@ -30,4 +30,9 @@ public class DatabaseUserStorage implements UserStorage {
         Optional<UserEntity> optional = repository.findById(id);
         return optional.isEmpty() ? Optional.empty() : Optional.of(mapper.entityToStorageUserItem(optional.get()));
     }
+
+    @Override
+    public Optional<StorageUserItem> createNewUser(StorageUserItem mapperResponse) {
+        return Optional.empty();
+    }
 }

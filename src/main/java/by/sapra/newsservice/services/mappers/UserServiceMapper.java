@@ -13,4 +13,6 @@ public interface UserServiceMapper {
     UserListModel storageUserListToUserListModel(StorageUserList storageUserList);
 
     UserItemModel storageUserItemToUserItemModel(StorageUserItem storageUser);
+
+    StorageUserItem userItemModelToStorageUserItem(UserItemModel expected);
 }

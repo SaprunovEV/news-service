@@ -10,4 +10,6 @@ public interface UserStorage {
     StorageUserList findAll(UserFilter filter);
 
     Optional<StorageUserItem> findById(long id);
+
+    Optional<StorageUserItem> createNewUser(StorageUserItem mapperResponse);
 }
