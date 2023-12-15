@@ -9,15 +9,21 @@ import by.sapra.newsservice.services.models.filters.UserFilter;
 import by.sapra.newsservice.storages.UserStorage;
 import by.sapra.newsservice.storages.models.StorageUserItem;
 import by.sapra.newsservice.storages.models.StorageUserList;
+import net.bytebuddy.utility.RandomString;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.Optional;
+import java.util.stream.Stream;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
@@ -104,7 +110,7 @@ class UserServiceTest {
         });
 
         verify(storage, times(1)).findById(id);
-        verify(mapper, times(2)).storageUserItemToUserItemModel(storageUser);
+        verify(mapper, times(1)).storageUserItemToUserItemModel(storageUser);
     }
 
     @Test
@@ -121,10 +127,78 @@ class UserServiceTest {
             assertNotNull(actual);
             assertTrue(actual.hasError());
             assertNotNull(actual.getError());
+            String errorMessage = MessageFormat.format("Пользователь с ID {0} не найден!", id);
+            assertEquals(errorMessage, actual.getError().getMessage());
         });
 
         verify(storage, times(1)).findById(id);
         verify(mapper, times(0)).storageUserItemToUserItemModel(storageUser);
+    }
+
+    @ParameterizedTest
+    @MethodSource("getUserNames")
+    void whenCreateUser_thenReturnSavedUser(String name) throws Exception {
+        String username = name;
+        long id = 1L;
+        UserItemModel expected = UserItemModel.builder().name(username).build();
+
+        StorageUserItem mapperResponse = StorageUserItem.builder().name(username).build();
+        when(mapper.userItemModelToStorageUserItem(expected)).thenReturn(mapperResponse);
+
+        Optional<StorageUserItem> optional = Optional.of(
+                StorageUserItem
+                        .builder()
+                        .id(id)
+                        .name(username)
+                        .build()
+        );
+        when(storage.createNewUser(mapperResponse)).thenReturn(optional);
+
+        UserItemModel result = UserItemModel.builder().name(username).id(id).build();
+        when(mapper.storageUserItemToUserItemModel(optional.get())).thenReturn(result);
+
+        ApplicationModel<UserItemModel, UserError> actual = service.createUser(expected);
+
+        assertAll(() -> {
+            assertNotNull(actual);
+            assertFalse(actual.hasError());
+            assertNotNull(actual.getData());
+            assertNotNull(actual.getData().getId());
+            assertEquals(expected.getName(), actual.getData().getName());
+        });
+
+        verify(mapper, times(1)).userItemModelToStorageUserItem(expected);
+        verify(storage, times(1)).createNewUser(mapperResponse);
+        verify(mapper, times(1)).storageUserItemToUserItemModel(optional.get());
+    }
+
+    @Test
+    void whenCreateNewUser_withBusyName_thenReturnError() throws Exception {
+        String username = "username";
+
+        UserItemModel expected = UserItemModel.builder().name(username).build();
+
+        StorageUserItem mapperResponse = StorageUserItem.builder().name(username).build();
+        when(mapper.userItemModelToStorageUserItem(expected)).thenReturn(mapperResponse);
+
+        when(storage.createNewUser(mapperResponse)).thenReturn(Optional.empty());
+
+        ApplicationModel<UserItemModel, UserError> actual = service.createUser(expected);
+
+        assertAll(() -> {
+            assertNotNull(actual);
+            assertTrue(actual.hasError());
+            assertNotNull(actual.getError());
+            String errorMessage = MessageFormat.format("Пользователь с именем {0} уже существует!", username);
+            assertEquals(errorMessage, actual.getError().getMessage());
+        });
+    }
+
+    public static Stream<Arguments> getUserNames() {
+        return Stream.of(
+                Arguments.arguments(RandomString.make(10)),
+                Arguments.arguments(RandomString.make(10))
+        );
     }
 
     private StorageUserList createStorageUserList(int count) {

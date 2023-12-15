@@ -90,6 +90,34 @@ class UserStorageTest extends AbstractDataTest {
         });
     }
 
+    @Test
+    void whenCreateNewUser_thenSaveNewUser_andReturnNotEmptyOptional() throws Exception {
+        String username = "username";
+        StorageUserItem expected = StorageUserItem.builder().name(username).build();
+
+        Optional<StorageUserItem> actual = storage.createNewUser(expected);
+
+        assertAll(() -> {
+            assertTrue(actual.isPresent());
+            assertEquals(expected.getName(),actual.get().getName());
+            assertNotNull(getTestDbFacade().find(actual.get().getId(), UserEntity.class));
+        });
+    }
+
+    @Test
+    void whenCreateNewUser_andNameAlreadyExist_thenReturnEmptyOptional() throws Exception {
+        String username = "username";
+
+        getTestDbFacade().save(aUser().withName(username));
+
+        StorageUserItem expected = StorageUserItem.builder().name(username).build();
+        Optional<StorageUserItem> actual = storage.createNewUser(expected);
+
+        assertAll(() -> {
+            assertTrue(actual.isEmpty());
+        });
+    }
+
     private void assertUsers(List<UserEntity> expected, List<StorageUserItem> users) {
         assertAll(() -> {
             List<String> names = users.stream().map(StorageUserItem::getName).toList();

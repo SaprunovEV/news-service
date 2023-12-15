@@ -10,4 +10,6 @@ public interface UserService {
     UserListModel findAllUsers(UserFilter filter);
 
     ApplicationModel<UserItemModel, UserError> findUserById(long id);
+
+    ApplicationModel<UserItemModel, UserError> createUser(UserItemModel request);
 }

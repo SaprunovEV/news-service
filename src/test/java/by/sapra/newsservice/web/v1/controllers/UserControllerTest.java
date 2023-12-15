@@ -9,8 +9,10 @@ import by.sapra.newsservice.services.models.filters.UserFilter;
 import by.sapra.newsservice.testUtils.StringTestUtils;
 import by.sapra.newsservice.web.v1.AbstractErrorControllerTest;
 import by.sapra.newsservice.web.v1.mappers.UserResponseMapper;
+import by.sapra.newsservice.web.v1.models.UpsertUserRequest;
 import by.sapra.newsservice.web.v1.models.UserItemResponse;
 import by.sapra.newsservice.web.v1.models.UserListResponse;
+import net.bytebuddy.utility.RandomString;
 import net.javacrumbs.jsonunit.JsonAssert;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
@@ -20,12 +22,15 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mock.web.MockHttpServletResponse;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
 
 import static org.mockito.Mockito.*;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = {UserController.class})
@@ -36,6 +41,13 @@ public class UserControllerTest extends AbstractErrorControllerTest {
     private UserResponseMapper mapper;
 
     public static Stream<Arguments> idsForSearch() {
+        return Stream.of(
+                Arguments.arguments(1),
+                Arguments.arguments(2)
+        );
+    }
+
+    public static Stream<Arguments> getUserId() {
         return Stream.of(
                 Arguments.arguments(1),
                 Arguments.arguments(2)
@@ -119,13 +131,142 @@ public class UserControllerTest extends AbstractErrorControllerTest {
 
         String actual = response.getContentAsString();
 
-        String expected = StringTestUtils.readStringFromResources("/responses/v1/users/user_not_found_error.json");
+        String expected = StringTestUtils.readStringFromResources("/responses/v1/errors/user_not_found_error.json");
 
         JsonAssert.assertJsonEquals(expected, actual);
 
         verify(service, times(1)).findUserById(id);
     }
 
+    @ParameterizedTest
+    @MethodSource("getUserId")
+    void whenCreateNewUser_thenReturnNewUserResponse(long id) throws Exception {
+        String username = "username " + id;
+        UpsertUserRequest request = UpsertUserRequest.builder()
+                .name(username)
+                .build();
+
+        UserItemModel mapperResponse = UserItemModel.builder().name(username).build();
+        when(mapper.requestToUserItemModel(request)).thenReturn(mapperResponse);
+
+        UserItemModel serviceResponse = UserItemModel.builder().name(username).id(id).build();
+        ApplicationModel<UserItemModel, UserError> model = mock(ApplicationModel.class);
+
+        when(model.hasError()).thenReturn(false);
+        when(model.getData()).thenReturn(serviceResponse);
+
+        when(service.createUser(mapperResponse)).thenReturn(model);
+
+        UserItemResponse result = UserItemResponse.builder().name(username).id(id).build();
+        when(mapper.serviceUserItemToUserItemResponse(serviceResponse)).thenReturn(result);
+
+        String actual = mockMvc.perform(
+                        post(getUrl())
+                                .contentType(APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse()
+                .getContentAsString();
+
+        String expected = StringTestUtils.readStringFromResources("/responses/v1/users/create_" + id + "_user_response.json");
+
+        JsonAssert.assertJsonEquals(expected, actual);
+
+        verify(mapper, times(1)).requestToUserItemModel(request);
+        verify(service, times(1)).createUser(mapperResponse);
+        verify(model, times(1)).hasError();
+        verify(model, times(1)).getData();
+        verify(mapper, times(1)).serviceUserItemToUserItemResponse(serviceResponse);
+    }
+
+    @Test
+    void whenCreateUser_and_UsernameAlresdyExist_thenReturnError() throws Exception {
+        long id = 1;
+        String username = "username " + id;
+        UpsertUserRequest request = UpsertUserRequest.builder()
+                .name(username)
+                .build();
+
+        UserItemModel mapperResponse = UserItemModel.builder().name(username).build();
+        when(mapper.requestToUserItemModel(request)).thenReturn(mapperResponse);
+
+        ApplicationModel<UserItemModel, UserError> model = mock(ApplicationModel.class);
+
+        when(model.hasError()).thenReturn(true);
+        when(model.getError()).thenReturn(UserError.builder()
+                        .message(MessageFormat.format("Пользователь с именем {0} уже существует!", username))
+                .build());
+
+        when(service.createUser(mapperResponse)).thenReturn(model);
+
+        MockHttpServletResponse response = mockMvc.perform(
+                        post(getUrl())
+                                .contentType(APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse();
+
+        response.setCharacterEncoding("UTF-8");
+
+        String actual = response.getContentAsString();
+
+        String expected = StringTestUtils.readStringFromResources("/responses/v1/users/username_already_exist_response.json");
+
+        JsonAssert.assertJsonEquals(expected, actual);
+
+        verify(mapper, times(1)).requestToUserItemModel(request);
+        verify(service, times(1)).createUser(mapperResponse);
+        verify(model, times(1)).hasError();
+        verify(model, times(1)).getError();
+    }
+
+    @Test
+    void whenCreateUser_withLongName_thenReturnError() throws Exception {
+        String username = RandomString.make(51);
+
+        UpsertUserRequest request = UpsertUserRequest.builder()
+                .name(username)
+                .build();
+
+        MockHttpServletResponse response = mockMvc.perform(
+                        post(getUrl())
+                                .contentType(APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
+                ).andExpect(status().isBadRequest())
+                .andReturn().getResponse();
+
+        response.setCharacterEncoding("UTF-8");
+
+        String actual = response.getContentAsString();
+
+        String expected = StringTestUtils.readStringFromResources("/responses/v1/errors/username_validation_error_response.json");
+
+        JsonAssert.assertJsonEquals(expected, actual);
+    }
+
+    @Test
+    void whenCreateUser_withEmptyName_thenReturnError() throws Exception {
+        String username ="";
+
+        UpsertUserRequest request = UpsertUserRequest.builder()
+                .name(username)
+                .build();
+
+        MockHttpServletResponse response = mockMvc.perform(
+                        post(getUrl())
+                                .contentType(APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
+                ).andExpect(status().isBadRequest())
+                .andReturn().getResponse();
+
+        response.setCharacterEncoding("UTF-8");
+
+        String actual = response.getContentAsString();
+
+        String expected = StringTestUtils.readStringFromResources("/responses/v1/errors/username_empty_error_response.json");
+
+        JsonAssert.assertJsonEquals(expected, actual);
+    }
     private static UserFilter createFilter(int pageNumber, int pageSize) {
         return UserFilter.builder()
                 .pageNumber(pageNumber)
@@ -135,7 +276,7 @@ public class UserControllerTest extends AbstractErrorControllerTest {
 
     private UserListModel createUserListModel(int count) {
         return UserListModel.builder()
-                .users(createUserItemModel(count))
+                .users(createUserItemModels(count))
                 .build();
     }
 
@@ -162,7 +303,7 @@ public class UserControllerTest extends AbstractErrorControllerTest {
     }
 
 
-    private List<UserItemModel> createUserItemModel(int count) {
+    private List<UserItemModel> createUserItemModels(int count) {
         ArrayList<UserItemModel> users = new ArrayList<>();
         for (long i = 1; i < count + 1; i++) {
             users.add(

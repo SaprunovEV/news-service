@@ -167,7 +167,7 @@ class CategoryControllerTest extends AbstractErrorControllerTest {
         CategoryError categoryErrorError = createCategoryNotFoundError(id);
         when(model.getError()).thenReturn(categoryErrorError);
 
-        assertValidateId(get(getUrl() + "/{id}", id), status().isNotFound(), "/responses/v1/categories/category_not_found_error_response.json");
+        assertValidateId(get(getUrl() + "/{id}", id), status().isNotFound(), "/responses/v1/errors/category_not_found_error_response.json");
 
         verify(service, times(1)).findById(id);
     }
@@ -331,7 +331,7 @@ class CategoryControllerTest extends AbstractErrorControllerTest {
 
         assertValidateId(put(getUrl() + "/{id}", id)
                 .contentType(APPLICATION_JSON)
-                .content(objectMapper.writeValueAsString(request)), status().isBadRequest(), "/responses/v1/categories/category_not_found_error_response.json");
+                .content(objectMapper.writeValueAsString(request)), status().isBadRequest(), "/responses/v1/errors/category_not_found_error_response.json");
 
         verify(mapper, times(1)).requestWithIdToCategoryWithNews(request, id);
         verify(service, times(1)).updateCategory(category2update);

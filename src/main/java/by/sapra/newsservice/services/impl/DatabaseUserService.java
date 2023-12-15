@@ -37,4 +37,16 @@ public class DatabaseUserService implements UserService {
                 .mapper(mapper::storageUserItemToUserItemModel)
                 .build();
     }
+
+    @Override
+    public ApplicationModel<UserItemModel, UserError> createUser(UserItemModel request) {
+        StorageUserItem userToSave = mapper.userItemModelToStorageUserItem(request);
+        Optional<StorageUserItem> optional = storage.createNewUser(userToSave);
+
+        return UserApplicationModel.builder()
+                .model(optional)
+                .mapper(mapper::storageUserItemToUserItemModel)
+                .message(MessageFormat.format("Пользователь с именем {0} уже существует!", request.getName()))
+                .build();
+    }
 }

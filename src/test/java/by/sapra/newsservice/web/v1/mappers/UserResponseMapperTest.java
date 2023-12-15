@@ -2,6 +2,7 @@ package by.sapra.newsservice.web.v1.mappers;
 
 import by.sapra.newsservice.services.models.UserItemModel;
 import by.sapra.newsservice.services.models.UserListModel;
+import by.sapra.newsservice.web.v1.models.UpsertUserRequest;
 import by.sapra.newsservice.web.v1.models.UserItemResponse;
 import by.sapra.newsservice.web.v1.models.UserListResponse;
 import org.junit.jupiter.api.Test;
@@ -23,7 +24,7 @@ class UserResponseMapperTest {
     void shouldMapUserListModelToUserListResponse() throws Exception {
         UserListModel expected = UserListModel.builder()
                 .users(List.of(
-                        UserItemModel.builder().id(1).name("name").build()
+                        UserItemModel.builder().id(1L).name("name").build()
                 ))
                 .build();
 
@@ -40,7 +41,7 @@ class UserResponseMapperTest {
 
     @Test
     void shouldMapUserItemModelToUserItemResponse() throws Exception {
-        UserItemModel expected = UserItemModel.builder().id(1).name("name").build();
+        UserItemModel expected = UserItemModel.builder().id(1L).name("name").build();
 
         UserItemResponse actual = mapper.serviceUserItemToUserItemResponse(expected);
 
@@ -48,6 +49,20 @@ class UserResponseMapperTest {
             assertNotNull(actual);
             assertEquals(expected.getName(), actual.getName());
             assertEquals(expected.getId(), actual.getId());
+        });
+    }
+
+    @Test
+    void shouldMapRequestToUserItemModel() throws Exception {
+        UpsertUserRequest expected = UpsertUserRequest.builder()
+                .name("username")
+                .build();
+
+        UserItemModel actual = mapper.requestToUserItemModel(expected);
+
+        assertAll(() -> {
+            assertNotNull(actual);
+            assertEquals(expected.getName(), actual.getName());
         });
     }
 

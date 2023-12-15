@@ -5,18 +5,20 @@ import by.sapra.newsservice.services.UserService;
 import by.sapra.newsservice.services.models.ApplicationModel;
 import by.sapra.newsservice.services.models.UserItemModel;
 import by.sapra.newsservice.services.models.filters.UserFilter;
+import by.sapra.newsservice.web.v1.annotations.CreateUserDock;
 import by.sapra.newsservice.web.v1.annotations.FindAllUsersDock;
 import by.sapra.newsservice.web.v1.annotations.FindUserByIdDock;
 import by.sapra.newsservice.web.v1.mappers.UserResponseMapper;
+import by.sapra.newsservice.web.v1.models.UpsertUserRequest;
 import by.sapra.newsservice.web.v1.models.UserId;
+import by.sapra.newsservice.web.v1.models.UserItemResponse;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
+import static org.springframework.http.HttpStatus.CREATED;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 @RestController
@@ -41,5 +43,17 @@ public class UserController {
         return ResponseEntity.ok(
                 mapper.serviceUserItemToUserItemResponse(serviceResponse.getData())
         );
+    }
+
+    @PostMapping
+    @CreateUserDock
+    public ResponseEntity<?> handleCreationUser(@RequestBody @Valid UpsertUserRequest request) {
+        UserItemModel user2save = mapper.requestToUserItemModel(request);
+        ApplicationModel<UserItemModel, UserError> model = service.createUser(user2save);
+        if (model.hasError()) {
+            return ResponseEntity.badRequest().body(model.getError());
+        }
+        UserItemResponse response = mapper.serviceUserItemToUserItemResponse(model.getData());
+        return ResponseEntity.status(CREATED).body(response);
     }
 }
