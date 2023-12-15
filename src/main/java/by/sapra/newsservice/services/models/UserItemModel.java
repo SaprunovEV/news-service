@@ -6,6 +6,6 @@ import lombok.Data;
 @Data
 @Builder
 public class UserItemModel {
-    private long id;
+    private Long id;
     private String name;
 }
