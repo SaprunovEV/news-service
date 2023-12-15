@@ -127,6 +127,8 @@ class UserServiceTest {
             assertNotNull(actual);
             assertTrue(actual.hasError());
             assertNotNull(actual.getError());
+            String errorMessage = MessageFormat.format("Пользователь с ID {0} не найден!", id);
+            assertEquals(errorMessage, actual.getError().getMessage());
         });
 
         verify(storage, times(1)).findById(id);
