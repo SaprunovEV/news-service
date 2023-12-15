@@ -27,6 +27,7 @@ public class DatabaseUserStorage implements UserStorage {
 
     @Override
     public Optional<StorageUserItem> findById(long id) {
-        return null;
+        Optional<UserEntity> optional = repository.findById(id);
+        return optional.isEmpty() ? Optional.empty() : Optional.of(mapper.entityToStorageUserItem(optional.get()));
     }
 }
