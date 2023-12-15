@@ -61,6 +61,10 @@ public class UserController {
     @PutMapping("/{id}")
     @UpdateUserDock
     public ResponseEntity<?> handleUpdateUser(@Valid UserId id, @RequestBody @Valid UpsertUserRequest request) {
+        UserItemModel userToUpdate = mapper.requestToUserItemModelWithId(id.getId(), request);
+        ApplicationModel<UserItemModel, UserError> model = service.updateUser(userToUpdate);
+        if (model.hasError()) return ResponseEntity.status(NOT_FOUND).body(model.getError());
 
+        return ResponseEntity.ok(mapper.serviceUserItemToUserItemResponse(model.getData()));
     }
 }
