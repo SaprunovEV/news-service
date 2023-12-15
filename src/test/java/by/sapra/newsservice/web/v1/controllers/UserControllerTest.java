@@ -21,6 +21,7 @@ import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mock.web.MockHttpServletResponse;
 
+import java.text.MessageFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Stream;
@@ -39,6 +40,13 @@ public class UserControllerTest extends AbstractErrorControllerTest {
     private UserResponseMapper mapper;
 
     public static Stream<Arguments> idsForSearch() {
+        return Stream.of(
+                Arguments.arguments(1),
+                Arguments.arguments(2)
+        );
+    }
+
+    public static Stream<Arguments> getUserId() {
         return Stream.of(
                 Arguments.arguments(1),
                 Arguments.arguments(2)
@@ -129,9 +137,10 @@ public class UserControllerTest extends AbstractErrorControllerTest {
         verify(service, times(1)).findUserById(id);
     }
 
-    @Test
-    void whenCreateNewUser_thenReturnNewUserResponse() throws Exception {
-        String username = "user2save";
+    @ParameterizedTest
+    @MethodSource("getUserId")
+    void whenCreateNewUser_thenReturnNewUserResponse(long id) throws Exception {
+        String username = "username " + id;
         UpsertUserRequest request = UpsertUserRequest.builder()
                 .name(username)
                 .build();
@@ -139,7 +148,7 @@ public class UserControllerTest extends AbstractErrorControllerTest {
         UserItemModel mapperResponse = UserItemModel.builder().name(username).build();
         when(mapper.requestToUserItemModel(request)).thenReturn(mapperResponse);
 
-        UserItemModel serviceResponse = UserItemModel.builder().name(username).id(1L).build();
+        UserItemModel serviceResponse = UserItemModel.builder().name(username).id(id).build();
         ApplicationModel<UserItemModel, UserError> model = mock(ApplicationModel.class);
 
         when(model.hasError()).thenReturn(false);
@@ -147,7 +156,7 @@ public class UserControllerTest extends AbstractErrorControllerTest {
 
         when(service.createUser(mapperResponse)).thenReturn(model);
 
-        UserItemResponse result = createUserItemResponse(1);
+        UserItemResponse result = UserItemResponse.builder().name(username).id(id).build();
         when(mapper.serviceUserItemToUserItemResponse(serviceResponse)).thenReturn(result);
 
         String actual = mockMvc.perform(
@@ -158,13 +167,56 @@ public class UserControllerTest extends AbstractErrorControllerTest {
                 .andReturn().getResponse()
                 .getContentAsString();
 
-        String expected = StringTestUtils.readStringFromResources("/responses/v1/users/create_first_user_response.json");
+        String expected = StringTestUtils.readStringFromResources("/responses/v1/users/create_" + id + "_user_response.json");
 
         JsonAssert.assertJsonEquals(expected, actual);
 
         verify(mapper, times(1)).requestToUserItemModel(request);
         verify(service, times(1)).createUser(mapperResponse);
+        verify(model, times(1)).hasError();
+        verify(model, times(1)).getData();
         verify(mapper, times(1)).serviceUserItemToUserItemResponse(serviceResponse);
+    }
+
+    @Test
+    void whenCreateUser_and_UsernameAlresdyExist_thenReturnError() throws Exception {
+        long id = 1;
+        String username = "username " + id;
+        UpsertUserRequest request = UpsertUserRequest.builder()
+                .name(username)
+                .build();
+
+        UserItemModel mapperResponse = UserItemModel.builder().name(username).build();
+        when(mapper.requestToUserItemModel(request)).thenReturn(mapperResponse);
+
+        ApplicationModel<UserItemModel, UserError> model = mock(ApplicationModel.class);
+
+        when(model.hasError()).thenReturn(true);
+        when(model.getError()).thenReturn(UserError.builder()
+                        .message(MessageFormat.format("Пользователь с именем {0} уже существует!", username))
+                .build());
+
+        when(service.createUser(mapperResponse)).thenReturn(model);
+
+        MockHttpServletResponse response = mockMvc.perform(
+                        post(getUrl())
+                                .contentType(APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse();
+
+        response.setCharacterEncoding("UTF-8");
+
+        String actual = response.getContentAsString();
+
+        String expected = StringTestUtils.readStringFromResources("/responses/v1/users/username_already_exist_response.json");
+
+        JsonAssert.assertJsonEquals(expected, actual);
+
+        verify(mapper, times(1)).requestToUserItemModel(request);
+        verify(service, times(1)).createUser(mapperResponse);
+        verify(model, times(1)).hasError();
+        verify(model, times(1)).getError();
     }
 
     private static UserFilter createFilter(int pageNumber, int pageSize) {
