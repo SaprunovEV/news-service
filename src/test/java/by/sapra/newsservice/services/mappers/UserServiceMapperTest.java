@@ -58,4 +58,38 @@ class UserServiceMapperTest {
             assertEquals(expected.getName(), actual.getName());
         });
     }
+
+    @Test
+    void shouldMapStorageUserItemToEntity() throws Exception {
+        String username = "username";
+        UserItemModel expected = UserItemModel.builder()
+                .name(username)
+                .id(1L)
+                .build();
+
+        StorageUserItem actual = mapper.userItemModelToStorageUserItem(expected);
+
+        assertAll(() -> {
+            assertNotNull(actual);
+            assertEquals(expected.getId(), actual.getId());
+            assertEquals(expected.getName(), actual.getName());
+        });
+    }
+
+    @Test
+    void shouldMapStorageUserItemToEntityWithIdNull() throws Exception {
+        String username = "username";
+        UserItemModel expected = UserItemModel.builder()
+                .name(username)
+                .id(null)
+                .build();
+
+        StorageUserItem actual = mapper.userItemModelToStorageUserItem(expected);
+
+        assertAll(() -> {
+            assertNotNull(actual);
+            assertNull(actual.getId());
+            assertEquals(expected.getName(), actual.getName());
+        });
+    }
 }
