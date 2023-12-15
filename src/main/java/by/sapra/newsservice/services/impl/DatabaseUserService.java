@@ -49,4 +49,9 @@ public class DatabaseUserService implements UserService {
                 .message(MessageFormat.format("Пользователь с именем {0} уже существует!", request.getName()))
                 .build();
     }
+
+    @Override
+    public ApplicationModel<UserItemModel, UserError> updateUser(UserItemModel model) {
+        return null;
+    }
 }

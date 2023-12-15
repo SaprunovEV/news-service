@@ -12,4 +12,6 @@ public interface UserService {
     ApplicationModel<UserItemModel, UserError> findUserById(long id);
 
     ApplicationModel<UserItemModel, UserError> createUser(UserItemModel request);
+
+    ApplicationModel<UserItemModel, UserError> updateUser(UserItemModel model);
 }

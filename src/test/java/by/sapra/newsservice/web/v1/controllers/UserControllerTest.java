@@ -29,8 +29,7 @@ import java.util.stream.Stream;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.http.MediaType.APPLICATION_JSON;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = {UserController.class})
@@ -267,6 +266,50 @@ public class UserControllerTest extends AbstractErrorControllerTest {
 
         JsonAssert.assertJsonEquals(expected, actual);
     }
+
+    @ParameterizedTest
+    @MethodSource("getUserId")
+    void whenUpdateUser_thenReturnUpdatedUser(long id) throws Exception {
+        String username = "username " + id;
+        UpsertUserRequest request = UpsertUserRequest.builder().name(username).build();
+
+        UserItemModel mapperResponse = UserItemModel.builder()
+                .name(username)
+                .build();
+        when(mapper.requestToUserItemModelWithId(id, request)).thenReturn(mapperResponse);
+
+        ApplicationModel<UserItemModel, UserError> model = mock(ApplicationModel.class);
+        when(model.hasError()).thenReturn(false);
+        when(model.getData()).thenReturn(UserItemModel.builder().id(id).name(username).build());
+
+        when(service.updateUser(mapperResponse)).thenReturn(model);
+
+        UserItemResponse result = UserItemResponse.builder()
+                .id(id)
+                .name(username)
+                .build();
+        when(mapper.serviceUserItemToUserItemResponse(model.getData())).thenReturn(result);
+
+        String actual = mockMvc.perform(
+                        put(getUrl() + "/{id}", id)
+                                .contentType(APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
+                )
+                .andExpect(status().isOk())
+                .andReturn().getResponse()
+                .getContentAsString();
+
+        String expected = StringTestUtils.readStringFromResources("/responses/v1/users/update_user_with_id_"+id+"_response.json");
+
+        JsonAssert.assertJsonEquals(expected, actual);
+
+        verify(mapper, times(1)).requestToUserItemModelWithId(id, request);
+        verify(service, times(1)).updateUser(mapperResponse);
+        verify(model, times(1)).hasError();
+        verify(model, times(1)).getData();
+        verify(mapper, times(1)).serviceUserItemToUserItemResponse(model.getData());
+    }
+
     private static UserFilter createFilter(int pageNumber, int pageSize) {
         return UserFilter.builder()
                 .pageNumber(pageNumber)
