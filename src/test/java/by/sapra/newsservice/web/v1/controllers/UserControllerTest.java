@@ -280,7 +280,8 @@ public class UserControllerTest extends AbstractErrorControllerTest {
 
         ApplicationModel<UserItemModel, UserError> model = mock(ApplicationModel.class);
         when(model.hasError()).thenReturn(false);
-        when(model.getData()).thenReturn(UserItemModel.builder().id(id).name(username).build());
+        UserItemModel modelResult = UserItemModel.builder().id(id).name(username).build();
+        when(model.getData()).thenReturn(modelResult);
 
         when(service.updateUser(mapperResponse)).thenReturn(model);
 
@@ -288,7 +289,7 @@ public class UserControllerTest extends AbstractErrorControllerTest {
                 .id(id)
                 .name(username)
                 .build();
-        when(mapper.serviceUserItemToUserItemResponse(model.getData())).thenReturn(result);
+        when(mapper.serviceUserItemToUserItemResponse(modelResult)).thenReturn(result);
 
         String actual = mockMvc.perform(
                         put(getUrl() + "/{id}", id)
@@ -299,7 +300,7 @@ public class UserControllerTest extends AbstractErrorControllerTest {
                 .andReturn().getResponse()
                 .getContentAsString();
 
-        String expected = StringTestUtils.readStringFromResources("/responses/v1/users/update_user_with_id_"+id+"_response.json");
+        String expected = StringTestUtils.readStringFromResources("/responses/v1/users/update_user_with_id_" + id + "_response.json");
 
         JsonAssert.assertJsonEquals(expected, actual);
 
