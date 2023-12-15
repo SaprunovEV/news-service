@@ -37,4 +37,9 @@ public class DatabaseUserService implements UserService {
                 .mapper(mapper::storageUserItemToUserItemModel)
                 .build();
     }
+
+    @Override
+    public ApplicationModel<UserItemModel, UserError> createUser(UserItemModel request) {
+        return null;
+    }
 }

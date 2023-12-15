@@ -9,6 +9,7 @@ import by.sapra.newsservice.services.models.filters.UserFilter;
 import by.sapra.newsservice.testUtils.StringTestUtils;
 import by.sapra.newsservice.web.v1.AbstractErrorControllerTest;
 import by.sapra.newsservice.web.v1.mappers.UserResponseMapper;
+import by.sapra.newsservice.web.v1.models.UpsertUserRequest;
 import by.sapra.newsservice.web.v1.models.UserItemResponse;
 import by.sapra.newsservice.web.v1.models.UserListResponse;
 import net.javacrumbs.jsonunit.JsonAssert;
@@ -25,7 +26,9 @@ import java.util.List;
 import java.util.stream.Stream;
 
 import static org.mockito.Mockito.*;
+import static org.springframework.http.MediaType.APPLICATION_JSON;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
+import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.status;
 
 @WebMvcTest(controllers = {UserController.class})
@@ -126,6 +129,44 @@ public class UserControllerTest extends AbstractErrorControllerTest {
         verify(service, times(1)).findUserById(id);
     }
 
+    @Test
+    void whenCreateNewUser_thenReturnNewUserResponse() throws Exception {
+        String username = "user2save";
+        UpsertUserRequest request = UpsertUserRequest.builder()
+                .name(username)
+                .build();
+
+        UserItemModel mapperResponse = UserItemModel.builder().name(username).build();
+        when(mapper.requestToUserItemModel(request)).thenReturn(mapperResponse);
+
+        UserItemModel serviceResponse = UserItemModel.builder().name(username).id(1L).build();
+        ApplicationModel<UserItemModel, UserError> model = mock(ApplicationModel.class);
+
+        when(model.hasError()).thenReturn(false);
+        when(model.getData()).thenReturn(serviceResponse);
+
+        when(service.createUser(mapperResponse)).thenReturn(model);
+
+        UserItemResponse result = createUserItemResponse(1);
+        when(mapper.serviceUserItemToUserItemResponse(serviceResponse)).thenReturn(result);
+
+        String actual = mockMvc.perform(
+                        post(getUrl())
+                                .contentType(APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request)))
+                .andExpect(status().isCreated())
+                .andReturn().getResponse()
+                .getContentAsString();
+
+        String expected = StringTestUtils.readStringFromResources("/responses/v1/users/create_first_user_response.json");
+
+        JsonAssert.assertJsonEquals(expected, actual);
+
+        verify(mapper, times(1)).requestToUserItemModel(request);
+        verify(service, times(1)).createUser(mapperResponse);
+        verify(mapper, times(1)).serviceUserItemToUserItemResponse(serviceResponse);
+    }
+
     private static UserFilter createFilter(int pageNumber, int pageSize) {
         return UserFilter.builder()
                 .pageNumber(pageNumber)
@@ -135,7 +176,7 @@ public class UserControllerTest extends AbstractErrorControllerTest {
 
     private UserListModel createUserListModel(int count) {
         return UserListModel.builder()
-                .users(createUserItemModel(count))
+                .users(createUserItemModels(count))
                 .build();
     }
 
@@ -162,7 +203,7 @@ public class UserControllerTest extends AbstractErrorControllerTest {
     }
 
 
-    private List<UserItemModel> createUserItemModel(int count) {
+    private List<UserItemModel> createUserItemModels(int count) {
         ArrayList<UserItemModel> users = new ArrayList<>();
         for (long i = 1; i < count + 1; i++) {
             users.add(
