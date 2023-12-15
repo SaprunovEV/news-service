@@ -6,6 +6,6 @@ import lombok.Data;
 @Builder
 @Data
 public class StorageUserItem {
-    private long id;
+    private Long id;
     private String name;
 }
