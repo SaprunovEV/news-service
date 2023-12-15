@@ -20,4 +20,6 @@ public interface StorageUserMapper {
     List<StorageUserItem> entityListToStorageUserItemList(List<UserEntity> content);
 
     StorageUserItem entityToStorageUserItem(UserEntity item);
+
+    UserEntity storageUserEntityToEntity(StorageUserItem mapperResponse);
 }

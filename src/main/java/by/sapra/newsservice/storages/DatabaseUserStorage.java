@@ -10,6 +10,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.Optional;
 
@@ -32,7 +33,10 @@ public class DatabaseUserStorage implements UserStorage {
     }
 
     @Override
-    public Optional<StorageUserItem> createNewUser(StorageUserItem mapperResponse) {
-        return Optional.empty();
+    @Transactional
+    public Optional<StorageUserItem> createNewUser(StorageUserItem userToSave) {
+        if (repository.findByName(userToSave.getName()).isPresent()) return Optional.empty();
+        UserEntity savedUser = repository.save(mapper.storageUserEntityToEntity(userToSave));
+        return Optional.ofNullable(mapper.entityToStorageUserItem(savedUser));
     }
 }
