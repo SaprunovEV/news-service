@@ -1,6 +1,8 @@
 package by.sapra.newsservice.services;
 
+import by.sapra.newsservice.models.errors.UserError;
 import by.sapra.newsservice.services.mappers.UserServiceMapper;
+import by.sapra.newsservice.services.models.ApplicationModel;
 import by.sapra.newsservice.services.models.UserItemModel;
 import by.sapra.newsservice.services.models.UserListModel;
 import by.sapra.newsservice.services.models.filters.UserFilter;
@@ -15,9 +17,9 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit.jupiter.SpringExtension;
 
 import java.util.ArrayList;
+import java.util.Optional;
 
-import static org.junit.jupiter.api.Assertions.assertAll;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.*;
 
 @ExtendWith(SpringExtension.class)
@@ -73,20 +75,83 @@ class UserServiceTest {
         verify(mapper, times(1)).storageUserListToUserListModel(storageUserList);
     }
 
-    private static StorageUserList createStorageUserList(int count) {
+    @Test
+    void whenFindById_theNotReturnNull() throws Exception {
+        ApplicationModel<UserItemModel, UserError> actual = service.findUserById(1);
+
+        assertNotNull(actual);
+    }
+
+    @Test
+    void whenFindById_thenReturnApplicationModelWithoutError() throws Exception {
+        long id = 1;
+
+        StorageUserItem storageUser = createStorageUserItem(id);
+
+        when(storage.findById(id)).thenReturn(Optional.of(storageUser));
+
+        UserItemModel userModel = createUserItemModel(id);
+        when(mapper.storageUserItemToUserItemModel(storageUser)).thenReturn(userModel);
+
+        ApplicationModel<UserItemModel, UserError> actual = service.findUserById(id);
+
+
+        assertAll(() -> {
+            assertNotNull(actual);
+            assertFalse(actual.hasError());
+            assertNotNull(actual.getData());
+            assertEquals(id, actual.getData().getId());
+        });
+
+        verify(storage, times(1)).findById(id);
+        verify(mapper, times(2)).storageUserItemToUserItemModel(storageUser);
+    }
+
+    @Test
+    void whenFindId_thenReturnError_ifUserNotFound() throws Exception {
+        long id = 1;
+
+        StorageUserItem storageUser = createStorageUserItem(id);
+
+        when(storage.findById(id)).thenReturn(Optional.empty());
+
+        ApplicationModel<UserItemModel, UserError> actual = service.findUserById(id);
+
+        assertAll(() -> {
+            assertNotNull(actual);
+            assertTrue(actual.hasError());
+            assertNotNull(actual.getError());
+        });
+
+        verify(storage, times(1)).findById(id);
+        verify(mapper, times(0)).storageUserItemToUserItemModel(storageUser);
+    }
+
+    private StorageUserList createStorageUserList(int count) {
         ArrayList<StorageUserItem> users = new ArrayList<>();
 
         for (long i = 1; i < count; i++) {
             users.add(
-                    StorageUserItem.builder()
-                            .id(i)
-                            .name("user name " + i)
-                            .build()
+                    createStorageUserItem(i)
             );
         }
 
         return StorageUserList.builder()
                 .users(users)
+                .build();
+    }
+
+    private UserItemModel createUserItemModel(long id) {
+        return UserItemModel.builder()
+                .name("user name " + id)
+                .id(id)
+                .build();
+    }
+
+    private StorageUserItem createStorageUserItem(long id) {
+        return StorageUserItem.builder()
+                .name("user name " + id)
+                .id(id)
                 .build();
     }
 
