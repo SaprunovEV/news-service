@@ -314,6 +314,55 @@ public class UserControllerTest extends AbstractErrorControllerTest {
     }
 
     @Test
+    void whenUpdateUser_withLongName_thenReturnError() throws Exception {
+        String username = RandomString.make(51);
+        Long id = 1L;
+
+        UpsertUserRequest request = UpsertUserRequest.builder()
+                .name(username)
+                .build();
+
+        MockHttpServletResponse response = mockMvc.perform(
+                        put(getUrl() + "/{id}", id)
+                                .contentType(APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
+                ).andExpect(status().isBadRequest())
+                .andReturn().getResponse();
+
+        response.setCharacterEncoding("UTF-8");
+
+        String actual = response.getContentAsString();
+
+        String expected = StringTestUtils.readStringFromResources("/responses/v1/errors/username_validation_error_response.json");
+
+        JsonAssert.assertJsonEquals(expected, actual);
+    }
+
+    @Test
+    void whenUpdateUser_withEmptyName_thenReturnError() throws Exception {
+        String username ="";
+        Long id  = 1L;
+        UpsertUserRequest request = UpsertUserRequest.builder()
+                .name(username)
+                .build();
+
+        MockHttpServletResponse response = mockMvc.perform(
+                        put(getUrl() + "/{id}", id)
+                                .contentType(APPLICATION_JSON)
+                                .content(objectMapper.writeValueAsString(request))
+                ).andExpect(status().isBadRequest())
+                .andReturn().getResponse();
+
+        response.setCharacterEncoding("UTF-8");
+
+        String actual = response.getContentAsString();
+
+        String expected = StringTestUtils.readStringFromResources("/responses/v1/errors/username_empty_error_response.json");
+
+        JsonAssert.assertJsonEquals(expected, actual);
+    }
+
+    @Test
     void whenDeleteUser_thenReturnNoContent() throws Exception {
         long id = 1L;
 
@@ -335,6 +384,34 @@ public class UserControllerTest extends AbstractErrorControllerTest {
         long id = 0;
 
         assertValidateId(delete(getUrl() + "/{id}", id), status().isBadRequest(), "/responses/v1/errors/negative_id_error_response.json");
+    }
+
+    @Test
+    void whenFindIdIsNegative_shouldReturnError() throws Exception {
+        long id = -1;
+
+        assertValidateId(get(getUrl() + "/{id}", id), status().isBadRequest(), "/responses/v1/errors/negative_id_error_response.json");
+    }
+
+    @Test
+    void whenFindIdIsZero_shouldReturnError() throws Exception {
+        long id = 0;
+
+        assertValidateId(get(getUrl() + "/{id}", id), status().isBadRequest(), "/responses/v1/errors/negative_id_error_response.json");
+    }
+
+    @Test
+    void whenUpdateIdIsNegative_shouldReturnError() throws Exception {
+        long id = -1;
+
+        assertValidateId(put(getUrl() + "/{id}", id), status().isBadRequest(), "/responses/v1/errors/negative_id_error_response.json");
+    }
+
+    @Test
+    void whenUpdateIdIsZero_shouldReturnError() throws Exception {
+        long id = 0;
+
+        assertValidateId(put(getUrl() + "/{id}", id), status().isBadRequest(), "/responses/v1/errors/negative_id_error_response.json");
     }
 
     private void assertValidateId(MockHttpServletRequestBuilder id, ResultMatcher BadRequest, String path) throws Exception {
