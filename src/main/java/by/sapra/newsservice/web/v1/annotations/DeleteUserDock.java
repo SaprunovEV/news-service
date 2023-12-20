@@ -15,7 +15,8 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Operation(
         summary = "Delete user by ID.",
         method = "DELETE",
-        description = "Delete user by ID. Return NO CONTENT."
+        description = "Delete user by ID. Return NO CONTENT.",
+        tags = {"user", "V1"}
 )
 @ApiResponse(
         responseCode = "204"

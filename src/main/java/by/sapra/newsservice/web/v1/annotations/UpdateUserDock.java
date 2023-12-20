@@ -1,6 +1,5 @@
 package by.sapra.newsservice.web.v1.annotations;
 
-import by.sapra.newsservice.models.errors.CategoryError;
 import by.sapra.newsservice.models.errors.UserError;
 import by.sapra.newsservice.web.v1.models.UserItemResponse;
 import io.swagger.v3.oas.annotations.Operation;
@@ -17,7 +16,8 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Operation(
         method = "PUT",
         summary = "Update new user.",
-        description = "Update new user. Return updated user."
+        description = "Update new user. Return updated user.",
+        tags = {"user", "V1"}
 )
 @ApiResponse(
         responseCode = "200",

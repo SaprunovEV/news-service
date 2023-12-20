@@ -16,7 +16,8 @@ import static java.lang.annotation.RetentionPolicy.RUNTIME;
 @Operation(
         method = "POST",
         summary = "Create new user.",
-        description = "Create new user. Return created user."
+        description = "Create new user. Return created user.",
+        tags = {"user", "V1"}
 )
 @ApiResponse(
         responseCode = "201",
