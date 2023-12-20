@@ -17,7 +17,7 @@ import static org.mapstruct.ReportingPolicy.IGNORE;
 public interface StorageNewsMapper {
     default NewsListModel entitiesListToNewsListModel(List<NewsEntity> content, Map<Long, Long> countsMap) {
         return NewsListModel.builder()
-                .news(content.stream().map(entity -> entityToModel(entity, countsMap.get(entity.getId()))).toList())
+                .news(content.stream().map(entity -> entityToModelWithCategoryList(entity, countsMap.get(entity.getId()))).toList())
                 .count(content.size())
                 .build();
     }

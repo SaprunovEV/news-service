@@ -1,5 +1,7 @@
 package by.sapra.newsservice.storages.mappers;
 
+import by.sapra.newsservice.models.Category2News;
+import by.sapra.newsservice.models.CategoryEntity;
 import by.sapra.newsservice.models.NewsEntity;
 import by.sapra.newsservice.storages.models.NewsListModel;
 import by.sapra.newsservice.storages.models.NewsModel;
@@ -35,7 +37,7 @@ class StorageNewsMapperTest {
     void shouldMapEntityToNewsModel() throws Exception {
         NewsEntity expected = createEntity(1L);
 
-        NewsModel actual = mapper.entityToModel(expected, (long) expected.getComments().size());
+        NewsModel actual = mapper.entityToModelWithCategoryList(expected, (long) expected.getComments().size());
 
         assertNewsModel(expected, actual);
     }
@@ -76,7 +78,19 @@ class StorageNewsMapperTest {
                         ))
                 .withUser(aUser())
                 .build();
+
         result.setId(id);
+
+        Category2News category2News = new Category2News();
+        category2News.setNews(result);
+        CategoryEntity category = new CategoryEntity();
+        category.setId(id);
+        category2News.setCategory(category);
+        result.setCategory2News(
+                List.of(
+                        category2News
+                )
+        );
         return result;
     }
 
@@ -96,6 +110,9 @@ class StorageNewsMapperTest {
             assertEquals(expected.getNewsAbstract(), actual.getNewsAbstract(),"abstract should be equals");
             assertEquals(expected.getBody(), actual.getBody(), "body should be equals");
             assertEquals(expected.getComments().size(), actual.getCommentSize(),"comment count should be equals");
+            expected.getCategory2News().stream().map(Category2News::getCategory).map(CategoryEntity::getId).forEach(
+                    id -> assertTrue(actual.getCategoryIds().contains(id))
+            );
         });
     }
 }
