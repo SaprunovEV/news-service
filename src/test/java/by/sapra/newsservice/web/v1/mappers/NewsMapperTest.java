@@ -69,6 +69,7 @@ class NewsMapperTest {
                 .categoryIds(List.of(
                         1L, 2L
                 ))
+                .owner(1L)
                 .build();
     }
 
@@ -80,6 +81,7 @@ class NewsMapperTest {
             assertEquals(expected.getNewsAbstract(), actual.getNewsAbstract());
             assertEquals(expected.getCommentsCount(), actual.getCommentsCount());
             assertEquals(expected.getBody(), actual.getBody());
+            assertEquals(expected.getOwner(), actual.getOwner());
             expected.getCategoryIds().forEach(id -> assertTrue(actual.getCategoryIds().contains(id)));
         });
     }

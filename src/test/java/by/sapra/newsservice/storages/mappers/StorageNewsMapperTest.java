@@ -3,9 +3,11 @@ package by.sapra.newsservice.storages.mappers;
 import by.sapra.newsservice.models.Category2News;
 import by.sapra.newsservice.models.CategoryEntity;
 import by.sapra.newsservice.models.NewsEntity;
+import by.sapra.newsservice.models.UserEntity;
 import by.sapra.newsservice.storages.models.NewsListModel;
 import by.sapra.newsservice.storages.models.NewsModel;
 import by.sapra.newsservice.storages.reposytory.CommentRepository;
+import by.sapra.newsservice.testUtils.UserTestDataBuilder;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +39,7 @@ class StorageNewsMapperTest {
     void shouldMapEntityToNewsModel() throws Exception {
         NewsEntity expected = createEntity(1L);
 
-        NewsModel actual = mapper.entityToModelWithCategoryList(expected, (long) expected.getComments().size());
+        NewsModel actual = mapper.entityToModelWithLinks(expected, (long) expected.getComments().size());
 
         assertNewsModel(expected, actual);
     }
@@ -68,6 +70,9 @@ class StorageNewsMapperTest {
     }
 
     private static NewsEntity createEntity(long id) {
+        UserTestDataBuilder userBuilder = aUser();
+        UserEntity user = userBuilder.build();
+        user.setId(1L);
         NewsEntity result = aNews()
                 .withComments(
                         List.of(
@@ -76,10 +81,11 @@ class StorageNewsMapperTest {
                                 aComment(),
                                 aComment()
                         ))
-                .withUser(aUser())
+                .withUser(userBuilder)
                 .build();
 
         result.setId(id);
+        result.setUser(user);
 
         Category2News category2News = new Category2News();
         category2News.setNews(result);
@@ -110,6 +116,8 @@ class StorageNewsMapperTest {
             assertEquals(expected.getNewsAbstract(), actual.getNewsAbstract(),"abstract should be equals");
             assertEquals(expected.getBody(), actual.getBody(), "body should be equals");
             assertEquals(expected.getComments().size(), actual.getCommentSize(),"comment count should be equals");
+            assertNotNull(actual.getOwner(), "владелец не должен быть null");
+            assertEquals(expected.getUser().getId(), actual.getOwner(), "должен установить владельца");
             expected.getCategory2News().stream().map(Category2News::getCategory).map(CategoryEntity::getId).forEach(
                     id -> assertTrue(actual.getCategoryIds().contains(id))
             );
