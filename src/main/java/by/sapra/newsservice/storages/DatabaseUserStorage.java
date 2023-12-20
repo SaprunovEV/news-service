@@ -41,7 +41,14 @@ public class DatabaseUserStorage implements UserStorage {
     }
 
     @Override
-    public Optional<StorageUserItem> updateUser(StorageUserItem mapperResponse) {
-        return Optional.empty();
+    public Optional<StorageUserItem> updateUser(StorageUserItem userItem) {
+        UserEntity userToUpdate = mapper.storageUserEntityToEntity(userItem);
+        Optional<UserEntity> optional = repository.findById(userToUpdate.getId());
+        if (optional.isEmpty()) {
+            return Optional.empty();
+        }
+        UserEntity result = optional.get();
+        result.setName(userToUpdate.getName());
+        return Optional.of(mapper.entityToStorageUserItem(repository.save(result)));
     }
 }
