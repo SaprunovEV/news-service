@@ -5,10 +5,7 @@ import by.sapra.newsservice.services.UserService;
 import by.sapra.newsservice.services.models.ApplicationModel;
 import by.sapra.newsservice.services.models.UserItemModel;
 import by.sapra.newsservice.services.models.filters.UserFilter;
-import by.sapra.newsservice.web.v1.annotations.CreateUserDock;
-import by.sapra.newsservice.web.v1.annotations.FindAllUsersDock;
-import by.sapra.newsservice.web.v1.annotations.FindUserByIdDock;
-import by.sapra.newsservice.web.v1.annotations.UpdateUserDock;
+import by.sapra.newsservice.web.v1.annotations.*;
 import by.sapra.newsservice.web.v1.mappers.UserResponseMapper;
 import by.sapra.newsservice.web.v1.models.UpsertUserRequest;
 import by.sapra.newsservice.web.v1.models.UserId;
@@ -69,6 +66,7 @@ public class UserController {
     }
 
     @DeleteMapping("/{id}")
+    @DeleteUserDock
     public ResponseEntity<?> handleDeleteUser(@Valid UserId id) {
         service.deleteUser(id.getId());
         return ResponseEntity.noContent().build();
