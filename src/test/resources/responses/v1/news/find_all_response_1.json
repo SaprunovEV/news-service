@@ -6,7 +6,8 @@
       "newsAbstract": "test abstract 1",
       "body": "test body 1",
       "commentsCount": 1,
-      "categoryIds": [1, 2, 3]
+      "categoryIds": [1, 2, 3],
+      "owner": 1
     },
     {
       "id": 2,
@@ -14,7 +15,8 @@
       "newsAbstract": "test abstract 2",
       "body": "test body 2",
       "commentsCount": 2,
-      "categoryIds": [1, 2, 3]
+      "categoryIds": [1, 2, 3],
+      "owner": 1
     },
     {
       "id": 3,
@@ -22,7 +24,8 @@
       "newsAbstract": "test abstract 3",
       "body": "test body 3",
       "commentsCount": 3,
-      "categoryIds": [1, 2, 3]
+      "categoryIds": [1, 2, 3],
+      "owner": 1
     }
   ]
 }
