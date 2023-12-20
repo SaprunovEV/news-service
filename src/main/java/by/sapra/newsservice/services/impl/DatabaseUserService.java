@@ -63,6 +63,6 @@ public class DatabaseUserService implements UserService {
 
     @Override
     public void deleteUser(long id) {
-
+        storage.deleteUser(id);
     }
 }

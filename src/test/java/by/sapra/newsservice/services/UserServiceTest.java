@@ -259,6 +259,15 @@ class UserServiceTest {
         });
     }
 
+    @Test
+    void shouldDeleteUserById() throws Exception {
+        long id = 1L;
+
+        service.deleteUser(id);
+
+        verify(storage, times(1)).deleteUser(id);
+    }
+
     public static Stream<Arguments> getUserNames() {
         return Stream.of(
                 Arguments.arguments(RandomString.make(10)),
