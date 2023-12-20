@@ -51,4 +51,9 @@ public class DatabaseUserStorage implements UserStorage {
         result.setName(userToUpdate.getName());
         return Optional.of(mapper.entityToStorageUserItem(repository.save(result)));
     }
+
+    @Override
+    public void deleteUser(long id) {
+        repository.deleteById(id);
+    }
 }

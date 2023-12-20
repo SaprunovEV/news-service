@@ -1,11 +1,12 @@
 package by.sapra.newsservice.storages;
 
 import by.sapra.newsservice.config.AbstractDataTest;
-import by.sapra.newsservice.models.UserEntity;
+import by.sapra.newsservice.models.*;
 import by.sapra.newsservice.services.models.filters.UserFilter;
 import by.sapra.newsservice.storages.mappers.MapperConf;
 import by.sapra.newsservice.storages.models.StorageUserItem;
 import by.sapra.newsservice.storages.models.StorageUserList;
+import by.sapra.newsservice.testUtils.*;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
@@ -15,6 +16,10 @@ import java.util.List;
 import java.util.Optional;
 import java.util.stream.Stream;
 
+import static by.sapra.newsservice.testUtils.Category2NewsTestDataBuilder.aCategory2News;
+import static by.sapra.newsservice.testUtils.CategoryTestDataBuilder.aCategory;
+import static by.sapra.newsservice.testUtils.CommentTestDataBuilder.aComment;
+import static by.sapra.newsservice.testUtils.NewsTestDataBuilder.aNews;
 import static by.sapra.newsservice.testUtils.UserTestDataBuilder.aUser;
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -147,6 +152,33 @@ class UserStorageTest extends AbstractDataTest {
         assertAll(() -> {
             assertTrue(actual.isEmpty());
             assertNull(getTestDbFacade().find(id, UserEntity.class));
+        });
+    }
+
+    @Test
+    void shouldDeleteUserWithAllLinks() throws Exception {
+        TestDataBuilder<UserEntity> userBuilder = getTestDbFacade().persistedOnce(aUser());
+        TestDataBuilder<CategoryEntity> categoryBuilder = getTestDbFacade().persistedOnce(aCategory());
+
+        TestDataBuilder<NewsEntity> newsBuilder = getTestDbFacade().persistedOnce(aNews().withUser(userBuilder));
+
+        Category2News category2news = getTestDbFacade().save(
+                aCategory2News()
+                        .withCategory(categoryBuilder)
+                        .withNews(newsBuilder)
+        );
+
+        CommentEntity comment = getTestDbFacade().save(aComment().withNews(newsBuilder).withUser(userBuilder));
+
+        storage.deleteUser(userBuilder.build().getId());
+
+        assertAll(() -> {
+            assertNull(getTestDbFacade().find(userBuilder.build().getId(), UserEntity.class));
+            assertNull(getTestDbFacade().find(newsBuilder.build().getId(), NewsEntity.class));
+            assertNull(getTestDbFacade().find(category2news.getId(), Category2News.class));
+            assertNull(getTestDbFacade().find(comment.getId(), CommentEntity.class));
+
+            assertNotNull(getTestDbFacade().find(categoryBuilder.build().getId(), CategoryEntity.class));
         });
     }
 

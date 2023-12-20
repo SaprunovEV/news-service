@@ -60,4 +60,9 @@ public class DatabaseUserService implements UserService {
                 .message(MessageFormat.format("Пользователь с ID {0} не найден!", model.getId()))
                 .build();
     }
+
+    @Override
+    public void deleteUser(long id) {
+        storage.deleteUser(id);
+    }
 }

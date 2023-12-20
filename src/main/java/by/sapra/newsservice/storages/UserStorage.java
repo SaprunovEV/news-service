@@ -14,4 +14,6 @@ public interface UserStorage {
     Optional<StorageUserItem> createNewUser(StorageUserItem mapperResponse);
 
     Optional<StorageUserItem> updateUser(StorageUserItem mapperResponse);
+
+    void deleteUser(long id);
 }
