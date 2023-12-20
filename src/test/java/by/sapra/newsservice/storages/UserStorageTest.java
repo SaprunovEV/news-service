@@ -118,6 +118,38 @@ class UserStorageTest extends AbstractDataTest {
         });
     }
 
+    @Test
+    void whenUpdateUser_thenSaveUpdateUser_andReturnNotEmptyOptional() throws Exception {
+        String username = "username";
+        Long id = getTestDbFacade().save(aUser().withName("oldName")).getId();
+
+        StorageUserItem expected = StorageUserItem.builder().id(id).name(username).build();
+
+        Optional<StorageUserItem> actual = storage.updateUser(expected);
+
+        assertAll(() -> {
+            assertTrue(actual.isPresent());
+            assertEquals(expected.getName(),actual.get().getName());
+            assertEquals(id, actual.get().getId());
+            assertNotNull(getTestDbFacade().find(actual.get().getId(), UserEntity.class));
+            assertEquals(username, getTestDbFacade().find(actual.get().getId(), UserEntity.class).getName());
+        });
+    }
+
+    @Test
+    void whenUpdateUser_andUserWithIdNotFound_thenReturnEmptyOptional() throws Exception {
+        String username = "username";
+        Long id = 1L;
+
+        StorageUserItem expected = StorageUserItem.builder().id(id).name(username).build();
+        Optional<StorageUserItem> actual = storage.updateUser(expected);
+
+        assertAll(() -> {
+            assertTrue(actual.isEmpty());
+            assertNull(getTestDbFacade().find(id, UserEntity.class));
+        });
+    }
+
     private void assertUsers(List<UserEntity> expected, List<StorageUserItem> users) {
         assertAll(() -> {
             List<String> names = users.stream().map(StorageUserItem::getName).toList();

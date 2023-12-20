@@ -172,6 +172,71 @@ class UserServiceTest {
         verify(mapper, times(1)).storageUserItemToUserItemModel(optional.get());
     }
 
+    @ParameterizedTest
+    @MethodSource("getUserIds")
+    void whenUpdateUser_thenReturnUpdatedUser(Long id) throws Exception {
+        String username = "username " + id;
+        UserItemModel expected = UserItemModel.builder().name(username).id(id).build();
+
+        StorageUserItem mapperResponse = StorageUserItem.builder().name(username).build();
+        when(mapper.userItemModelToStorageUserItem(expected)).thenReturn(mapperResponse);
+
+        Optional<StorageUserItem> optional = Optional.of(
+                StorageUserItem
+                        .builder()
+                        .id(id)
+                        .name(username)
+                        .build()
+        );
+        when(storage.updateUser(mapperResponse)).thenReturn(optional);
+
+        UserItemModel result = UserItemModel.builder().name(username).id(id).build();
+        when(mapper.storageUserItemToUserItemModel(optional.get())).thenReturn(result);
+
+        ApplicationModel<UserItemModel, UserError> actual = service.updateUser(expected);
+
+        assertAll(() -> {
+            assertNotNull(actual, "не должен возвращать null");
+            assertFalse(actual.hasError(), "не должен возвращать ошибку");
+            assertNotNull(actual.getData(), "должен возвращать данные");
+            assertEquals(actual.getData().getId(), id,"должен иметь правильный id");
+            assertEquals(expected.getName(), actual.getData().getName(), "имена должны совпадать");
+        });
+
+        verify(mapper, times(1)).userItemModelToStorageUserItem(expected);
+        verify(storage, times(1)).updateUser(mapperResponse);
+        verify(mapper, times(1)).storageUserItemToUserItemModel(optional.get());
+    }
+
+    @Test
+    void whenUpdateUser_andUserIdNotFound_thenReturnError() throws Exception {
+        String username = "username";
+        Long id = 1L;
+        UserItemModel expected = UserItemModel.builder().name(username).id(id).build();
+
+        StorageUserItem mapperResponse = StorageUserItem.builder().name(username).build();
+        when(mapper.userItemModelToStorageUserItem(expected)).thenReturn(mapperResponse);
+
+        when(storage.createNewUser(mapperResponse)).thenReturn(Optional.empty());
+
+        ApplicationModel<UserItemModel, UserError> actual = service.updateUser(expected);
+
+        assertAll(() -> {
+            assertNotNull(actual);
+            assertTrue(actual.hasError());
+            assertNotNull(actual.getError());
+            String errorMessage = MessageFormat.format("Пользователь с ID {0} не найден!", id);
+            assertEquals(errorMessage, actual.getError().getMessage());
+        });
+    }
+
+    public static Stream<Arguments> getUserIds() {
+        return Stream.of(
+                Arguments.arguments(1L),
+                Arguments.arguments(2L)
+        );
+    }
+
     @Test
     void whenCreateNewUser_withBusyName_thenReturnError() throws Exception {
         String username = "username";

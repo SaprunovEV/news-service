@@ -8,6 +8,7 @@ import by.sapra.newsservice.services.models.filters.UserFilter;
 import by.sapra.newsservice.web.v1.annotations.CreateUserDock;
 import by.sapra.newsservice.web.v1.annotations.FindAllUsersDock;
 import by.sapra.newsservice.web.v1.annotations.FindUserByIdDock;
+import by.sapra.newsservice.web.v1.annotations.UpdateUserDock;
 import by.sapra.newsservice.web.v1.mappers.UserResponseMapper;
 import by.sapra.newsservice.web.v1.models.UpsertUserRequest;
 import by.sapra.newsservice.web.v1.models.UserId;
@@ -55,5 +56,15 @@ public class UserController {
         }
         UserItemResponse response = mapper.serviceUserItemToUserItemResponse(model.getData());
         return ResponseEntity.status(CREATED).body(response);
+    }
+
+    @PutMapping("/{id}")
+    @UpdateUserDock
+    public ResponseEntity<?> handleUpdateUser(@Valid UserId id, @RequestBody @Valid UpsertUserRequest request) {
+        UserItemModel userToUpdate = mapper.requestToUserItemModelWithId(id.getId(), request);
+        ApplicationModel<UserItemModel, UserError> model = service.updateUser(userToUpdate);
+        if (model.hasError()) return ResponseEntity.status(NOT_FOUND).body(model.getError());
+
+        return ResponseEntity.ok(mapper.serviceUserItemToUserItemResponse(model.getData()));
     }
 }

@@ -49,4 +49,15 @@ public class DatabaseUserService implements UserService {
                 .message(MessageFormat.format("Пользователь с именем {0} уже существует!", request.getName()))
                 .build();
     }
+
+    @Override
+    public ApplicationModel<UserItemModel, UserError> updateUser(UserItemModel model) {
+        StorageUserItem userToUpdate = mapper.userItemModelToStorageUserItem(model);
+        Optional<StorageUserItem> optional = storage.updateUser(userToUpdate);
+        return UserApplicationModel.builder()
+                .model(optional)
+                .mapper(mapper::storageUserItemToUserItemModel)
+                .message(MessageFormat.format("Пользователь с ID {0} не найден!", model.getId()))
+                .build();
+    }
 }
