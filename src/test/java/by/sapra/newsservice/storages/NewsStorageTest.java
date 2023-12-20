@@ -4,7 +4,7 @@ import by.sapra.newsservice.config.AbstractDataTest;
 import by.sapra.newsservice.models.NewsEntity;
 import by.sapra.newsservice.models.UserEntity;
 import by.sapra.newsservice.services.models.filters.NewsFilter;
-import by.sapra.newsservice.storages.mappers.StorageNewsMapper;
+import by.sapra.newsservice.storages.mappers.MapperConf;
 import by.sapra.newsservice.storages.models.NewsListModel;
 import by.sapra.newsservice.storages.models.NewsModel;
 import by.sapra.newsservice.testUtils.TestDataBuilder;
@@ -12,6 +12,7 @@ import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
+import org.springframework.test.context.ContextHierarchy;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -22,17 +23,15 @@ import static by.sapra.newsservice.testUtils.NewsTestDataBuilder.aNews;
 import static by.sapra.newsservice.testUtils.UserTestDataBuilder.aUser;
 import static java.util.function.Function.identity;
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.*;
 
-@ContextConfiguration(classes = NewsStorageConf.class)
+@ContextHierarchy({
+        @ContextConfiguration(classes = MapperConf.class),
+        @ContextConfiguration(classes = NewsStorageConf.class)
+})
 class NewsStorageTest extends AbstractDataTest {
     @Autowired
     private NewsStorage newsStorage;
 
-    @Autowired
-    private StorageNewsMapper mapper;
 
     @Test
     void shouldReturnEmptyModelIfDatabaseIsEmpty() throws Exception {
@@ -61,18 +60,27 @@ class NewsStorageTest extends AbstractDataTest {
         int count = 5;
         Map<Long, NewsEntity> map = saveNewsEntities(count);
 
-        List<NewsEntity> list = map.values().stream().toList().subList(0, 3);
-
-
-        when(mapper.entitiesListToNewsListModel(eq(list), any()))
-                .thenReturn(NewsListModel.builder()
-                        .count(list.size())
-                        .news(list.stream().map(news -> NewsModel.builder().build()).toList())
-                        .build());
+        List<NewsEntity> expected = map.values().stream().toList().subList(0, 3);
 
         NewsListModel actual = newsStorage.findAll(filter);
 
-        verify(mapper, times(1)).entitiesListToNewsListModel(eq(list), any());
+        assertAll(() -> {
+            assertNotNull(actual, "actual must not be null");
+            assertNotNull(actual.getNews(), "news must not be null");
+            assertEquals(expected.size(), actual.getCount(), "count must be 3");
+            for (int i = 0; i < 3; i++) {
+                assertModel(expected.get(i), actual.getNews().get(i));
+            }
+        });
+
+    }
+
+    private void assertModel(NewsEntity expected, NewsModel actual) {
+        assertAll(() -> {
+            assertEquals(expected.getId(), actual.getId());
+            assertEquals(expected.getUser().getId(), actual.getOwner());
+            assertEquals(expected.getTitle(), actual.getTitle());
+        });
     }
 
     private Map<Long, NewsEntity> saveNewsEntities(int count) {
