@@ -57,6 +57,7 @@ public class DatabaseUserService implements UserService {
         return UserApplicationModel.builder()
                 .model(optional)
                 .mapper(mapper::storageUserItemToUserItemModel)
+                .message(MessageFormat.format("Пользователь с ID {0} не найден!", model.getId()))
                 .build();
     }
 }
