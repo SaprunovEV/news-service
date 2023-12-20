@@ -39,4 +39,9 @@ public class DatabaseUserStorage implements UserStorage {
         UserEntity savedUser = repository.save(mapper.storageUserEntityToEntity(userToSave));
         return Optional.ofNullable(mapper.entityToStorageUserItem(savedUser));
     }
+
+    @Override
+    public Optional<StorageUserItem> updateUser(StorageUserItem mapperResponse) {
+        return Optional.empty();
+    }
 }

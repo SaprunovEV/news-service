@@ -52,6 +52,11 @@ public class DatabaseUserService implements UserService {
 
     @Override
     public ApplicationModel<UserItemModel, UserError> updateUser(UserItemModel model) {
-        return null;
+        StorageUserItem userToUpdate = mapper.userItemModelToStorageUserItem(model);
+        Optional<StorageUserItem> optional = storage.updateUser(userToUpdate);
+        return UserApplicationModel.builder()
+                .model(optional)
+                .mapper(mapper::storageUserItemToUserItemModel)
+                .build();
     }
 }

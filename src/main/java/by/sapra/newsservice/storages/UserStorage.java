@@ -12,4 +12,6 @@ public interface UserStorage {
     Optional<StorageUserItem> findById(long id);
 
     Optional<StorageUserItem> createNewUser(StorageUserItem mapperResponse);
+
+    Optional<StorageUserItem> updateUser(StorageUserItem mapperResponse);
 }
