@@ -67,4 +67,10 @@ public class UserController {
 
         return ResponseEntity.ok(mapper.serviceUserItemToUserItemResponse(model.getData()));
     }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> handleDeleteUser(@Valid UserId id) {
+        service.deleteUser(id.getId());
+        return ResponseEntity.noContent().build();
+    }
 }

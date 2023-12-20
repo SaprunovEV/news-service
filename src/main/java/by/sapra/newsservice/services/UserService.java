@@ -14,4 +14,6 @@ public interface UserService {
     ApplicationModel<UserItemModel, UserError> createUser(UserItemModel request);
 
     ApplicationModel<UserItemModel, UserError> updateUser(UserItemModel model);
+
+    void deleteUser(long id);
 }

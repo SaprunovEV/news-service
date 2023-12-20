@@ -21,6 +21,8 @@ import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
 import org.springframework.mock.web.MockHttpServletResponse;
+import org.springframework.test.web.servlet.ResultMatcher;
+import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import java.text.MessageFormat;
 import java.util.ArrayList;
@@ -309,6 +311,44 @@ public class UserControllerTest extends AbstractErrorControllerTest {
         verify(model, times(1)).hasError();
         verify(model, times(1)).getData();
         verify(mapper, times(1)).serviceUserItemToUserItemResponse(model.getData());
+    }
+
+    @Test
+    void whenDeleteUser_thenReturnNoContent() throws Exception {
+        long id = 1L;
+
+        mockMvc.perform(delete(getUrl() + "/{id}", id))
+                .andExpect(status().isNoContent());
+
+        verify(service, times(1)).deleteUser(id);
+    }
+
+    @Test
+    void whenDeletedIdIsNegative_shouldReturnError() throws Exception {
+        long id = -1;
+
+        assertValidateId(delete(getUrl() + "/{id}", id), status().isBadRequest(), "/responses/v1/errors/negative_id_error_response.json");
+    }
+
+    @Test
+    void whenDeletedIdIsZero_shouldReturnError() throws Exception {
+        long id = 0;
+
+        assertValidateId(delete(getUrl() + "/{id}", id), status().isBadRequest(), "/responses/v1/errors/negative_id_error_response.json");
+    }
+
+    private void assertValidateId(MockHttpServletRequestBuilder id, ResultMatcher BadRequest, String path) throws Exception {
+        MockHttpServletResponse response = mockMvc.perform(id)
+                .andExpect(BadRequest)
+                .andReturn().getResponse();
+
+        response.setCharacterEncoding("UTF-8");
+
+        String actual = response.getContentAsString();
+
+        String expected = StringTestUtils.readStringFromResources(path);
+
+        JsonAssert.assertJsonEquals(expected, actual);
     }
 
     private static UserFilter createFilter(int pageNumber, int pageSize) {
