@@ -66,6 +66,9 @@ class NewsMapperTest {
                 .title(i3)
                 .commentsCount(i1)
                 .body(i4)
+                .categoryIds(List.of(
+                        1L, 2L
+                ))
                 .build();
     }
 
@@ -77,6 +80,7 @@ class NewsMapperTest {
             assertEquals(expected.getNewsAbstract(), actual.getNewsAbstract());
             assertEquals(expected.getCommentsCount(), actual.getCommentsCount());
             assertEquals(expected.getBody(), actual.getBody());
+            expected.getCategoryIds().forEach(id -> assertTrue(actual.getCategoryIds().contains(id)));
         });
     }
 }
