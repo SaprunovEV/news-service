@@ -46,7 +46,7 @@ class StorageCategory2NewsMapperTest extends AbstractDataTest {
 
         mapper.lincToNewsModel(expected);
 
-        verify(newsMapper, times(1)).entityToModel(expected.getNews(), 0L);
+        verify(newsMapper, times(1)).entityToModelWithCategoryList(expected.getNews(), 0L);
     }
 
     @Test
@@ -71,6 +71,6 @@ class StorageCategory2NewsMapperTest extends AbstractDataTest {
         assertEquals(savedLinks.size(), actual.size());
 
         savedLinks.forEach(saved ->
-                verify(newsMapper, times(1)).entityToModel(saved.getNews(), 0L));
+                verify(newsMapper, times(1)).entityToModelWithCategoryList(saved.getNews(), 0L));
     }
 }
