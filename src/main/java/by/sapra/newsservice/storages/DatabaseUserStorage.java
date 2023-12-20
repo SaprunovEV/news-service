@@ -54,6 +54,6 @@ public class DatabaseUserStorage implements UserStorage {
 
     @Override
     public void deleteUser(long id) {
-
+        repository.deleteById(id);
     }
 }
