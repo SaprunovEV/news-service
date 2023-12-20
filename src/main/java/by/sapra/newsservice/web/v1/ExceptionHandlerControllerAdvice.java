@@ -3,6 +3,7 @@ package by.sapra.newsservice.web.v1;
 import by.sapra.newsservice.web.v1.models.ErrorResponse;
 import by.sapra.newsservice.web.v1.models.PaginationErrorResponse;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
+import org.springframework.dao.DataIntegrityViolationException;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -24,5 +25,16 @@ public class ExceptionHandlerControllerAdvice {
         errorResponse.setMessage(String.join(";", errorList));
 
         return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorResponse);
+    }
+
+    @ExceptionHandler(DataIntegrityViolationException.class)
+    public ResponseEntity<ErrorResponse> handleDataIntegrityViolationException(DataIntegrityViolationException ex) {
+        PaginationErrorResponse errorResponse = new PaginationErrorResponse();
+
+        String message = ex.getLocalizedMessage();
+
+        errorResponse.setMessage(message);
+
+        return ResponseEntity.status(HttpStatus.NOT_ACCEPTABLE).body(errorResponse);
     }
 }
