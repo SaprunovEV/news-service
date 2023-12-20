@@ -14,5 +14,6 @@ public class News {
     private String body;
     private List<Long> categoryIds;
     private Long commentsCount;
+    private Long owner;
     private List<Comment> comments;
 }

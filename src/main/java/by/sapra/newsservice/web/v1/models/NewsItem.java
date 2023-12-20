@@ -13,5 +13,6 @@ public class NewsItem {
     private String newsAbstract;
     private String body;
     private List<Long> categoryIds;
+    private Long owner;
     private Long commentsCount;
 }

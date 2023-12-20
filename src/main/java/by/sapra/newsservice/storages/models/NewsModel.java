@@ -14,5 +14,6 @@ public class NewsModel {
     private String body;
     private long commentSize;
     private List<Long> categoryIds;
+    private Long owner;
     private CommentListModel comments;
 }
