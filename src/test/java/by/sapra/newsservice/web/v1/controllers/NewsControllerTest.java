@@ -127,6 +127,7 @@ class NewsControllerTest extends AbstractErrorControllerTest {
                                 .build()
                 ))
                 .categoryIds(List.of(1L, 2L, 3L))
+                .owner(1L)
                 .build();
     }
 
@@ -150,6 +151,7 @@ class NewsControllerTest extends AbstractErrorControllerTest {
                 .body("test body " + id)
                 .commentsCount(id)
                 .categoryIds(List.of(1L, 2L, 3L))
+                .owner(1L)
                 .build();
     }
 
