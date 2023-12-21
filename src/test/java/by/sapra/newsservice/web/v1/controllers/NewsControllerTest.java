@@ -12,14 +12,19 @@ import by.sapra.newsservice.web.v1.models.NewsListResponse;
 import net.javacrumbs.jsonunit.JsonAssert;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
 import org.springframework.boot.test.mock.mockito.MockBean;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.request.MockHttpServletRequestBuilder;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Stream;
 
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.get;
@@ -33,6 +38,13 @@ class NewsControllerTest extends AbstractErrorControllerTest {
     private NewsService newsService;
     @MockBean
     private NewsMapper newsMapper;
+
+    public static Stream<Arguments> gerNotPositive() {
+        return Stream.of(
+                Arguments.arguments(0L),
+                Arguments.arguments(-1L)
+        );
+    }
 
     @Test
     void whenFindAll_thenReturnOk() throws Exception {
@@ -67,6 +79,40 @@ class NewsControllerTest extends AbstractErrorControllerTest {
 
         verify(newsService, times(1)).findAll(newsFilter);
         verify(newsMapper, times(1)).newsListToNewsListResponse(newsList);
+    }
+
+    @ParameterizedTest
+    @MethodSource("gerNotPositive")
+    void whereOwnerIsNotPositive_thenReturnError(Long id) throws Exception {
+
+        MockHttpServletResponse response = mockMvc.perform(getWithPagination("0", "3").param("owner", id.toString()))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse();
+
+        response.setCharacterEncoding("UTF-8");
+
+        String actual = response.getContentAsString();
+
+        String expected = StringTestUtils.readStringFromResources("/responses/v1/errors/owner_not_positive_error_response.json");
+
+        JsonAssert.assertJsonEquals(expected, actual);
+    }
+
+    @ParameterizedTest
+    @MethodSource("gerNotPositive")
+    void whereCategoryIdIsNotPositive_thenReturnError(Long id) throws Exception {
+
+        MockHttpServletResponse response = mockMvc.perform(getWithPagination("0", "3").param("category", id.toString()))
+                .andExpect(status().isBadRequest())
+                .andReturn().getResponse();
+
+        response.setCharacterEncoding("UTF-8");
+
+        String actual = response.getContentAsString();
+
+        String expected = StringTestUtils.readStringFromResources("/responses/v1/errors/category_not_positive_error_response.json");
+
+        JsonAssert.assertJsonEquals(expected, actual);
     }
 
     @NotNull
@@ -126,6 +172,8 @@ class NewsControllerTest extends AbstractErrorControllerTest {
                                 .count(i)
                                 .build()
                 ))
+                .categoryIds(List.of(1L, 2L, 3L))
+                .owner(1L)
                 .build();
     }
 
@@ -148,6 +196,8 @@ class NewsControllerTest extends AbstractErrorControllerTest {
                 .newsAbstract("test abstract " + id)
                 .body("test body " + id)
                 .commentsCount(id)
+                .categoryIds(List.of(1L, 2L, 3L))
+                .owner(1L)
                 .build();
     }
 

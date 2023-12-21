@@ -13,6 +13,6 @@ public class DelegateStorageCategory2NewsMapper implements StorageCategory2NewsM
 
     @Override
     public NewsModel lincToNewsModel(Category2News category2News) {
-        return delegate.entityToModel(category2News.getNews(), repository.countByNews_Id(category2News.getNews().getId()));
+        return delegate.entityToModelWithLinks(category2News.getNews(), repository.countByNews_Id(category2News.getNews().getId()));
     }
 }

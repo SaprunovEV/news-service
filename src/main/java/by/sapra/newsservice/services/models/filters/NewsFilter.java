@@ -13,4 +13,9 @@ public class NewsFilter {
     @NotNull(message = "Номер страницы должен быть заполнен!")
     @PositiveOrZero(message = "Номер страницы должен быть положителен!")
     private Integer pageNumber;
+
+    @Positive(message = "Id владельца должен быть положителен!")
+    private Long owner;
+    @Positive(message = "Id категории должен быть положителен!")
+    private Long category;
 }
