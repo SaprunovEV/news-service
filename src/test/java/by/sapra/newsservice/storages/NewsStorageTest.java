@@ -86,11 +86,11 @@ class NewsStorageTest extends AbstractDataTest {
 
         NewsFilter filter = getNewsFilter(pageNumber, pageSize);
 
-        filter.setCategory(1L);
-
 
         TestDataBuilder<CategoryEntity> targetCategoryBuilder = getTestDbFacade().persistedOnce(aCategory().withName("targetName"));
         TestDataBuilder<CategoryEntity> categoryBuilder = getTestDbFacade().persistedOnce(aCategory().withName("notTargetName"));
+
+        filter.setCategory(targetCategoryBuilder.build().getId());
 
         TestDataBuilder<UserEntity> userBuilder = getTestDbFacade().persistedOnce(aUser());
 
