@@ -17,15 +17,13 @@ import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.ContextHierarchy;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
 import static by.sapra.newsservice.testUtils.Category2NewsTestDataBuilder.aCategory2News;
 import static by.sapra.newsservice.testUtils.CategoryTestDataBuilder.aCategory;
 import static by.sapra.newsservice.testUtils.NewsTestDataBuilder.aNews;
 import static by.sapra.newsservice.testUtils.UserTestDataBuilder.aUser;
-import static java.util.function.Function.identity;
 import static org.junit.jupiter.api.Assertions.*;
 
 @ContextHierarchy({
@@ -62,9 +60,9 @@ class NewsStorageTest extends AbstractDataTest {
         NewsFilter filter = getNewsFilter(pageNumber, pageSize);
 
         int count = 5;
-        Map<Long, NewsEntity> map = saveNewsEntities(count);
+        List<NewsEntity> savedEntities = saveNewsEntities(count).stream().sorted(Comparator.comparing(NewsEntity::getId)).toList();
 
-        List<NewsEntity> expected = map.values().stream().toList().subList(0, 3);
+        List<NewsEntity> expected = savedEntities.subList(0, 3);
 
         NewsListModel actual = newsStorage.findAll(filter);
 
@@ -262,7 +260,7 @@ class NewsStorageTest extends AbstractDataTest {
         });
     }
 
-    private Map<Long, NewsEntity> saveNewsEntities(int count) {
+    private List<NewsEntity> saveNewsEntities(int count) {
         TestDataBuilder<UserEntity> user = getTestDbFacade().persistedOnce(aUser());
         ArrayList<NewsEntity> list = new ArrayList<>();
         for (int i = 0; i < count; i++) {
@@ -274,7 +272,7 @@ class NewsStorageTest extends AbstractDataTest {
                     )
             );
         }
-        return list.stream().collect(Collectors.toMap(NewsEntity::getId, identity()));
+        return list;
     }
 
     @NotNull
