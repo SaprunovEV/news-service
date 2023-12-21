@@ -6,7 +6,18 @@ import org.springframework.data.jpa.domain.Specification;
 
 public interface NewsSpecification {
     static Specification<NewsEntity> withFilter(NewsFilter filter) {
-        return Specification.where(byCategoryId(filter.getCategory()));
+        return Specification.where(byCategoryId(filter.getCategory()))
+                .and(byOwnerId(filter.getOwner()));
+    }
+
+    static Specification<NewsEntity> byOwnerId(Long owner) {
+        return (root, qe, cb) -> {
+            if (owner==null) {
+                return null;
+            }
+
+            return cb.equal(root.get("user").get("id"), owner);
+        };
     }
 
     static Specification<NewsEntity> byCategoryId(Long category) {

@@ -190,6 +190,51 @@ class NewsStorageTest extends AbstractDataTest {
         });
     }
 
+    @Test
+    void shouldFilterByOwnerId() throws Exception {
+        int pageNumber = 0;
+        int pageSize = 3;
+
+        NewsFilter filter = getNewsFilter(pageNumber, pageSize);
+
+        TestDataBuilder<UserEntity> targetUser = getTestDbFacade().persistedOnce(aUser().withName("targetUser"));
+        TestDataBuilder<UserEntity> notTargetUser = getTestDbFacade().persistedOnce(aUser().withName("notTargetUser"));
+
+        filter.setOwner(targetUser.build().getId());
+
+        TestDataBuilder<CategoryEntity> categoryBuilder = getTestDbFacade().persistedOnce(aCategory());
+
+        List<Category2News> links = List.of(
+                saveCategoryLinks(categoryBuilder, targetUser, "title 1"),
+                saveCategoryLinks(categoryBuilder, notTargetUser, "title 1"),
+                saveCategoryLinks(categoryBuilder, targetUser, "title 1"),
+                saveCategoryLinks(categoryBuilder, notTargetUser, "title 1"),
+                saveCategoryLinks(categoryBuilder, targetUser, "title 1")
+        );
+
+        List<NewsEntity> expected = links.stream()
+                .map(Category2News::getNews).filter(news -> news.getUser().getId().equals(targetUser.build().getId())).toList();
+
+        NewsListModel actual = newsStorage.findAll(filter);
+
+        assertAll(() -> {
+            assertNotNull(actual);
+            assertNotNull(actual.getNews());
+            assertEquals(pageSize, actual.getCount());
+            assertEquals(expected.size(), actual.getNews().size());
+            for (int i = 0; i < actual.getNews().size(); i++) {
+                assertModelWithUser(expected.get(i), actual.getNews().get(i));
+            }
+        });
+    }
+
+    private void assertModelWithUser(NewsEntity expected, NewsModel actual) {
+        assertAll(() -> {
+            assertModel(expected, actual);
+            assertEquals(expected.getUser().getId(), actual.getOwner());
+        });
+    }
+
     private void assertModelWithCategory(NewsEntity entity, NewsModel newsModel, Long category) {
         assertAll(() -> {
             assertModel(entity, newsModel);
