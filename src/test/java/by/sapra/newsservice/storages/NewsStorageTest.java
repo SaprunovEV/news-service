@@ -118,6 +118,78 @@ class NewsStorageTest extends AbstractDataTest {
         });
     }
 
+    @Test
+    void shouldFilterByAnotherCategoryId() throws Exception {
+        int pageNumber = 0;
+        int pageSize = 3;
+
+        NewsFilter filter = getNewsFilter(pageNumber, pageSize);
+
+
+        TestDataBuilder<CategoryEntity> targetCategoryBuilder = getTestDbFacade().persistedOnce(aCategory().withName("targetName"));
+        TestDataBuilder<CategoryEntity> categoryBuilder = getTestDbFacade().persistedOnce(aCategory().withName("notTargetName"));
+
+        filter.setCategory(categoryBuilder.build().getId());
+
+        TestDataBuilder<UserEntity> userBuilder = getTestDbFacade().persistedOnce(aUser());
+
+        List<Category2News> links = List.of(
+                saveCategoryLinks(targetCategoryBuilder, userBuilder, "title 1"),
+                saveCategoryLinks(categoryBuilder, userBuilder, "title 2"),
+                saveCategoryLinks(targetCategoryBuilder, userBuilder, "title 3"),
+                saveCategoryLinks(categoryBuilder, userBuilder, "title 4"),
+                saveCategoryLinks(targetCategoryBuilder, userBuilder, "title 5")
+        );
+
+        List<NewsEntity> expected = links.stream()
+                .filter(link -> link.getCategory().getId().equals(categoryBuilder.build().getId())).map(Category2News::getNews).toList();
+
+        NewsListModel actual = newsStorage.findAll(filter);
+
+        assertAll(() -> {
+            assertNotNull(actual, "не должен возвращать null");
+            assertNotNull(actual.getNews(), "список новостей тоже не null");
+            assertEquals(2, actual.getCount(), "количество новостей равно pageSize");
+            assertEquals(expected.size(), actual.getNews().size(), "ожидаемое количество равно пришедшему");
+            for (int i = 0; i < expected.size(); i++) {
+                assertModelWithCategory(expected.get(i), actual.getNews().get(i), filter.getCategory());
+            }
+        });
+    }
+
+    @Test
+    void shouldReturnEmptyListIfCategoryNotPresent() throws Exception {
+        int pageNumber = 0;
+        int pageSize = 3;
+
+        NewsFilter filter = getNewsFilter(pageNumber, pageSize);
+
+
+        TestDataBuilder<CategoryEntity> targetCategoryBuilder = getTestDbFacade().persistedOnce(aCategory().withName("targetName"));
+        TestDataBuilder<CategoryEntity> categoryBuilder = getTestDbFacade().persistedOnce(aCategory().withName("notTargetName"));
+
+        filter.setCategory(110000L);
+
+        TestDataBuilder<UserEntity> userBuilder = getTestDbFacade().persistedOnce(aUser());
+
+
+        saveCategoryLinks(targetCategoryBuilder, userBuilder, "title 1");
+        saveCategoryLinks(categoryBuilder, userBuilder, "title 2");
+        saveCategoryLinks(targetCategoryBuilder, userBuilder, "title 3");
+        saveCategoryLinks(categoryBuilder, userBuilder, "title 4");
+        saveCategoryLinks(targetCategoryBuilder, userBuilder, "title 5");
+
+
+        NewsListModel actual = newsStorage.findAll(filter);
+
+        assertAll(() -> {
+            assertNotNull(actual);
+            assertNotNull(actual.getNews());
+            assertTrue(actual.getNews().isEmpty());
+            assertEquals(0, actual.getCount());
+        });
+    }
+
     private void assertModelWithCategory(NewsEntity entity, NewsModel newsModel, Long category) {
         assertAll(() -> {
             assertModel(entity, newsModel);

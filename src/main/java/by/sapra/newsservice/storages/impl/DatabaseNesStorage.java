@@ -7,6 +7,7 @@ import by.sapra.newsservice.storages.mappers.StorageNewsMapper;
 import by.sapra.newsservice.storages.models.NewsListModel;
 import by.sapra.newsservice.storages.reposytory.CommentRepository;
 import by.sapra.newsservice.storages.reposytory.NewsRepository;
+import by.sapra.newsservice.storages.reposytory.specifications.NewsSpecification;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -24,7 +25,10 @@ public class DatabaseNesStorage implements NewsStorage {
     private final StorageNewsMapper mapper;
     @Override
     public NewsListModel findAll(NewsFilter filter) {
-        Page<NewsEntity> page = repository.findAll(PageRequest.of(filter.getPageNumber(), filter.getPageSize()));
+        Page<NewsEntity> page = repository.findAll(
+                NewsSpecification.withFilter(filter),
+                PageRequest.of(filter.getPageNumber(), filter.getPageSize())
+        );
         return page.isEmpty() ? getEmptyModel() : mapListModel(page);
     }
 
